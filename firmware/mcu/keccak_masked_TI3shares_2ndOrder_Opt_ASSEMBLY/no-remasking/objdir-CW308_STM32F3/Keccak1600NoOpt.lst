@@ -1,0 +1,1721 @@
+   1              	# 1 "Keccak1600NoOpt.S"
+   1              	.thumb
+   0              	
+   0              	
+   2              	.syntax unified
+   3              	.text
+   4              	.thumb_func
+   5              	
+   6              	
+   7              	.equ Aba0_s0   , 0*4
+   8              	.equ Aba1_s0   , 1*4
+   9              	.equ Abe0_s0   , 2*4
+  10              	.equ Abe1_s0   , 3*4
+  11              	.equ Abi0_s0   , 4*4
+  12              	.equ Abi1_s0   , 5*4
+  13              	.equ Abo0_s0   , 6*4
+  14              	.equ Abo1_s0   , 7*4
+  15              	.equ Abu0_s0   , 8*4
+  16              	.equ Abu1_s0   , 9*4
+  17              	.equ Aga0_s0   , 10*4
+  18              	.equ Aga1_s0   , 11*4
+  19              	.equ Age0_s0   , 12*4
+  20              	.equ Age1_s0   , 13*4
+  21              	.equ Agi0_s0   , 14*4
+  22              	.equ Agi1_s0   , 15*4
+  23              	.equ Ago0_s0   , 16*4
+  24              	.equ Ago1_s0   , 17*4
+  25              	.equ Agu0_s0   , 18*4
+  26              	.equ Agu1_s0   , 19*4
+  27              	.equ Aka0_s0   , 20*4
+  28              	.equ Aka1_s0   , 21*4
+  29              	.equ Ake0_s0   , 22*4
+  30              	.equ Ake1_s0   , 23*4
+  31              	.equ Aki0_s0   , 24*4
+  32              	.equ Aki1_s0   , 25*4
+  33              	.equ Ako0_s0   , 26*4
+  34              	.equ Ako1_s0   , 27*4
+  35              	.equ Aku0_s0   , 28*4
+  36              	.equ Aku1_s0   , 29*4
+  37              	.equ Ama0_s0   , 30*4
+  38              	.equ Ama1_s0   , 31*4
+  39              	.equ Ame0_s0   , 32*4
+  40              	.equ Ame1_s0   , 33*4
+  41              	.equ Ami0_s0   , 34*4
+  42              	.equ Ami1_s0   , 35*4
+  43              	.equ Amo0_s0   , 36*4
+  44              	.equ Amo1_s0   , 37*4
+  45              	.equ Amu0_s0   , 38*4
+  46              	.equ Amu1_s0   , 39*4
+  47              	.equ Asa0_s0   , 40*4
+  48              	.equ Asa1_s0   , 41*4
+  49              	.equ Ase0_s0   , 42*4
+  50              	.equ Ase1_s0   , 43*4
+  51              	.equ Asi0_s0   , 44*4
+  52              	.equ Asi1_s0   , 45*4
+  53              	.equ Aso0_s0   , 46*4
+  54              	.equ Aso1_s0   , 47*4
+  55              	.equ Asu0_s0   , 48*4
+  56              	.equ Asu1_s0   , 49*4
+  57              	
+  58              	.equ Aba0_s1   , 0*4+200
+  59              	.equ Aba1_s1   , 1*4+200
+  60              	.equ Abe0_s1   , 2*4+200
+  61              	.equ Abe1_s1   , 3*4+200
+  62              	.equ Abi0_s1   , 4*4+200
+  63              	.equ Abi1_s1   , 5*4+200
+  64              	.equ Abo0_s1   , 6*4+200
+  65              	.equ Abo1_s1   , 7*4+200
+  66              	.equ Abu0_s1   , 8*4+200
+  67              	.equ Abu1_s1   , 9*4+200
+  68              	.equ Aga0_s1   , 10*4+200
+  69              	.equ Aga1_s1   , 11*4+200
+  70              	.equ Age0_s1   , 12*4+200
+  71              	.equ Age1_s1   , 13*4+200
+  72              	.equ Agi0_s1   , 14*4+200
+  73              	.equ Agi1_s1   , 15*4+200
+  74              	.equ Ago0_s1   , 16*4+200
+  75              	.equ Ago1_s1   , 17*4+200
+  76              	.equ Agu0_s1   , 18*4+200
+  77              	.equ Agu1_s1   , 19*4+200
+  78              	.equ Aka0_s1   , 20*4+200
+  79              	.equ Aka1_s1   , 21*4+200
+  80              	.equ Ake0_s1   , 22*4+200
+  81              	.equ Ake1_s1   , 23*4+200
+  82              	.equ Aki0_s1   , 24*4+200
+  83              	.equ Aki1_s1   , 25*4+200
+  84              	.equ Ako0_s1   , 26*4+200
+  85              	.equ Ako1_s1   , 27*4+200
+  86              	.equ Aku0_s1   , 28*4+200
+  87              	.equ Aku1_s1   , 29*4+200
+  88              	.equ Ama0_s1   , 30*4+200
+  89              	.equ Ama1_s1   , 31*4+200
+  90              	.equ Ame0_s1   , 32*4+200
+  91              	.equ Ame1_s1   , 33*4+200
+  92              	.equ Ami0_s1   , 34*4+200
+  93              	.equ Ami1_s1   , 35*4+200
+  94              	.equ Amo0_s1   , 36*4+200
+  95              	.equ Amo1_s1   , 37*4+200
+  96              	.equ Amu0_s1   , 38*4+200
+  97              	.equ Amu1_s1   , 39*4+200
+  98              	.equ Asa0_s1   , 40*4+200
+  99              	.equ Asa1_s1   , 41*4+200
+ 100              	.equ Ase0_s1   , 42*4+200
+ 101              	.equ Ase1_s1   , 43*4+200
+ 102              	.equ Asi0_s1   , 44*4+200
+ 103              	.equ Asi1_s1   , 45*4+200
+ 104              	.equ Aso0_s1   , 46*4+200
+ 105              	.equ Aso1_s1   , 47*4+200
+ 106              	.equ Asu0_s1   , 48*4+200
+ 107              	.equ Asu1_s1   , 49*4+200
+ 108              	
+ 109              	.equ Aba0_s2   , 0*4+400
+ 110              	.equ Aba1_s2   , 1*4+400
+ 111              	.equ Abe0_s2   , 2*4+400
+ 112              	.equ Abe1_s2   , 3*4+400
+ 113              	.equ Abi0_s2   , 4*4+400
+ 114              	.equ Abi1_s2   , 5*4+400
+ 115              	.equ Abo0_s2   , 6*4+400
+ 116              	.equ Abo1_s2   , 7*4+400
+ 117              	.equ Abu0_s2   , 8*4+400
+ 118              	.equ Abu1_s2   , 9*4+400
+ 119              	.equ Aga0_s2   , 10*4+400
+ 120              	.equ Aga1_s2   , 11*4+400
+ 121              	.equ Age0_s2   , 12*4+400
+ 122              	.equ Age1_s2   , 13*4+400
+ 123              	.equ Agi0_s2   , 14*4+400
+ 124              	.equ Agi1_s2   , 15*4+400
+ 125              	.equ Ago0_s2   , 16*4+400
+ 126              	.equ Ago1_s2   , 17*4+400
+ 127              	.equ Agu0_s2   , 18*4+400
+ 128              	.equ Agu1_s2   , 19*4+400
+ 129              	.equ Aka0_s2   , 20*4+400
+ 130              	.equ Aka1_s2   , 21*4+400
+ 131              	.equ Ake0_s2   , 22*4+400
+ 132              	.equ Ake1_s2   , 23*4+400
+ 133              	.equ Aki0_s2   , 24*4+400
+ 134              	.equ Aki1_s2   , 25*4+400
+ 135              	.equ Ako0_s2   , 26*4+400
+ 136              	.equ Ako1_s2   , 27*4+400
+ 137              	.equ Aku0_s2   , 28*4+400
+ 138              	.equ Aku1_s2   , 29*4+400
+ 139              	.equ Ama0_s2   , 30*4+400
+ 140              	.equ Ama1_s2   , 31*4+400
+ 141              	.equ Ame0_s2   , 32*4+400
+ 142              	.equ Ame1_s2   , 33*4+400
+ 143              	.equ Ami0_s2   , 34*4+400
+ 144              	.equ Ami1_s2   , 35*4+400
+ 145              	.equ Amo0_s2   , 36*4+400
+ 146              	.equ Amo1_s2   , 37*4+400
+ 147              	.equ Amu0_s2   , 38*4+400
+ 148              	.equ Amu1_s2   , 39*4+400
+ 149              	.equ Asa0_s2   , 40*4+400
+ 150              	.equ Asa1_s2   , 41*4+400
+ 151              	.equ Ase0_s2   , 42*4+400
+ 152              	.equ Ase1_s2   , 43*4+400
+ 153              	.equ Asi0_s2   , 44*4+400
+ 154              	.equ Asi1_s2   , 45*4+400
+ 155              	.equ Aso0_s2   , 46*4+400
+ 156              	.equ Aso1_s2   , 47*4+400
+ 157              	.equ Asu0_s2   , 48*4+400
+ 158              	.equ Asu1_s2   , 49*4+400
+ 159              	
+ 160              	
+ 161              	.equ Aba0_s0_M2   , 0*4+600
+ 162              	.equ Aba1_s0_M2   , 1*4+600
+ 163              	.equ Abe0_s0_M2   , 2*4+600
+ 164              	.equ Abe1_s0_M2   , 3*4+600
+ 165              	.equ Abi0_s0_M2   , 4*4+600
+ 166              	.equ Abi1_s0_M2   , 5*4+600
+ 167              	.equ Abo0_s0_M2   , 6*4+600
+ 168              	.equ Abo1_s0_M2   , 7*4+600
+ 169              	.equ Abu0_s0_M2   , 8*4+600
+ 170              	.equ Abu1_s0_M2   , 9*4+600
+ 171              	.equ Aga0_s0_M2   , 10*4+600
+ 172              	.equ Aga1_s0_M2   , 11*4+600
+ 173              	.equ Age0_s0_M2   , 12*4+600
+ 174              	.equ Age1_s0_M2   , 13*4+600
+ 175              	.equ Agi0_s0_M2   , 14*4+600
+ 176              	.equ Agi1_s0_M2   , 15*4+600
+ 177              	.equ Ago0_s0_M2   , 16*4+600
+ 178              	.equ Ago1_s0_M2   , 17*4+600
+ 179              	.equ Agu0_s0_M2   , 18*4+600
+ 180              	.equ Agu1_s0_M2   , 19*4+600
+ 181              	.equ Aka0_s0_M2   , 20*4+600
+ 182              	.equ Aka1_s0_M2   , 21*4+600
+ 183              	.equ Ake0_s0_M2   , 22*4+600
+ 184              	.equ Ake1_s0_M2   , 23*4+600
+ 185              	.equ Aki0_s0_M2   , 24*4+600
+ 186              	.equ Aki1_s0_M2   , 25*4+600
+ 187              	.equ Ako0_s0_M2   , 26*4+600
+ 188              	.equ Ako1_s0_M2   , 27*4+600
+ 189              	.equ Aku0_s0_M2   , 28*4+600
+ 190              	.equ Aku1_s0_M2   , 29*4+600
+ 191              	.equ Ama0_s0_M2   , 30*4+600
+ 192              	.equ Ama1_s0_M2   , 31*4+600
+ 193              	.equ Ame0_s0_M2   , 32*4+600
+ 194              	.equ Ame1_s0_M2   , 33*4+600
+ 195              	.equ Ami0_s0_M2   , 34*4+600
+ 196              	.equ Ami1_s0_M2   , 35*4+600
+ 197              	.equ Amo0_s0_M2   , 36*4+600
+ 198              	.equ Amo1_s0_M2   , 37*4+600
+ 199              	.equ Amu0_s0_M2   , 38*4+600
+ 200              	.equ Amu1_s0_M2   , 39*4+600
+ 201              	.equ Asa0_s0_M2   , 40*4+600
+ 202              	.equ Asa1_s0_M2   , 41*4+600
+ 203              	.equ Ase0_s0_M2   , 42*4+600
+ 204              	.equ Ase1_s0_M2   , 43*4+600
+ 205              	.equ Asi0_s0_M2   , 44*4+600
+ 206              	.equ Asi1_s0_M2   , 45*4+600
+ 207              	.equ Aso0_s0_M2   , 46*4+600
+ 208              	.equ Aso1_s0_M2   , 47*4+600
+ 209              	.equ Asu0_s0_M2   , 48*4+600
+ 210              	.equ Asu1_s0_M2   , 49*4+600
+ 211              	
+ 212              	
+ 213              	.equ Aba0_s1_M2   , 0*4+800
+ 214              	.equ Aba1_s1_M2   , 1*4+800
+ 215              	.equ Abe0_s1_M2   , 2*4+800
+ 216              	.equ Abe1_s1_M2   , 3*4+800
+ 217              	.equ Abi0_s1_M2   , 4*4+800
+ 218              	.equ Abi1_s1_M2   , 5*4+800
+ 219              	.equ Abo0_s1_M2   , 6*4+800
+ 220              	.equ Abo1_s1_M2   , 7*4+800
+ 221              	.equ Abu0_s1_M2   , 8*4+800
+ 222              	.equ Abu1_s1_M2   , 9*4+800
+ 223              	.equ Aga0_s1_M2   , 10*4+800
+ 224              	.equ Aga1_s1_M2   , 11*4+800
+ 225              	.equ Age0_s1_M2   , 12*4+800
+ 226              	.equ Age1_s1_M2   , 13*4+800
+ 227              	.equ Agi0_s1_M2   , 14*4+800
+ 228              	.equ Agi1_s1_M2   , 15*4+800
+ 229              	.equ Ago0_s1_M2   , 16*4+800
+ 230              	.equ Ago1_s1_M2   , 17*4+800
+ 231              	.equ Agu0_s1_M2   , 18*4+800
+ 232              	.equ Agu1_s1_M2   , 19*4+800
+ 233              	.equ Aka0_s1_M2   , 20*4+800
+ 234              	.equ Aka1_s1_M2   , 21*4+800
+ 235              	.equ Ake0_s1_M2   , 22*4+800
+ 236              	.equ Ake1_s1_M2   , 23*4+800
+ 237              	.equ Aki0_s1_M2   , 24*4+800
+ 238              	.equ Aki1_s1_M2   , 25*4+800
+ 239              	.equ Ako0_s1_M2   , 26*4+800
+ 240              	.equ Ako1_s1_M2   , 27*4+800
+ 241              	.equ Aku0_s1_M2   , 28*4+800
+ 242              	.equ Aku1_s1_M2   , 29*4+800
+ 243              	.equ Ama0_s1_M2   , 30*4+800
+ 244              	.equ Ama1_s1_M2   , 31*4+800
+ 245              	.equ Ame0_s1_M2   , 32*4+800
+ 246              	.equ Ame1_s1_M2   , 33*4+800
+ 247              	.equ Ami0_s1_M2   , 34*4+800
+ 248              	.equ Ami1_s1_M2   , 35*4+800
+ 249              	.equ Amo0_s1_M2   , 36*4+800
+ 250              	.equ Amo1_s1_M2   , 37*4+800
+ 251              	.equ Amu0_s1_M2   , 38*4+800
+ 252              	.equ Amu1_s1_M2   , 39*4+800
+ 253              	.equ Asa0_s1_M2   , 40*4+800
+ 254              	.equ Asa1_s1_M2   , 41*4+800
+ 255              	.equ Ase0_s1_M2   , 42*4+800
+ 256              	.equ Ase1_s1_M2   , 43*4+800
+ 257              	.equ Asi0_s1_M2   , 44*4+800
+ 258              	.equ Asi1_s1_M2   , 45*4+800
+ 259              	.equ Aso0_s1_M2   , 46*4+800
+ 260              	.equ Aso1_s1_M2   , 47*4+800
+ 261              	.equ Asu0_s1_M2   , 48*4+800
+ 262              	.equ Asu1_s1_M2   , 49*4+800
+ 263              	
+ 264              	
+ 265              	.equ Aba0_s2_M2   , 0*4+1000
+ 266              	.equ Aba1_s2_M2   , 1*4+1000
+ 267              	.equ Abe0_s2_M2   , 2*4+1000
+ 268              	.equ Abe1_s2_M2   , 3*4+1000
+ 269              	.equ Abi0_s2_M2   , 4*4+1000
+ 270              	.equ Abi1_s2_M2   , 5*4+1000
+ 271              	.equ Abo0_s2_M2   , 6*4+1000
+ 272              	.equ Abo1_s2_M2   , 7*4+1000
+ 273              	.equ Abu0_s2_M2   , 8*4+1000
+ 274              	.equ Abu1_s2_M2   , 9*4+1000
+ 275              	.equ Aga0_s2_M2   , 10*4+1000
+ 276              	.equ Aga1_s2_M2   , 11*4+1000
+ 277              	.equ Age0_s2_M2   , 12*4+1000
+ 278              	.equ Age1_s2_M2   , 13*4+1000
+ 279              	.equ Agi0_s2_M2   , 14*4+1000
+ 280              	.equ Agi1_s2_M2   , 15*4+1000
+ 281              	.equ Ago0_s2_M2   , 16*4+1000
+ 282              	.equ Ago1_s2_M2   , 17*4+1000
+ 283              	.equ Agu0_s2_M2   , 18*4+1000
+ 284              	.equ Agu1_s2_M2   , 19*4+1000
+ 285              	.equ Aka0_s2_M2   , 20*4+1000
+ 286              	.equ Aka1_s2_M2   , 21*4+1000
+ 287              	.equ Ake0_s2_M2   , 22*4+1000
+ 288              	.equ Ake1_s2_M2   , 23*4+1000
+ 289              	.equ Aki0_s2_M2   , 24*4+1000
+ 290              	.equ Aki1_s2_M2   , 25*4+1000
+ 291              	.equ Ako0_s2_M2   , 26*4+1000
+ 292              	.equ Ako1_s2_M2   , 27*4+1000
+ 293              	.equ Aku0_s2_M2   , 28*4+1000
+ 294              	.equ Aku1_s2_M2   , 29*4+1000
+ 295              	.equ Ama0_s2_M2   , 30*4+1000
+ 296              	.equ Ama1_s2_M2   , 31*4+1000
+ 297              	.equ Ame0_s2_M2   , 32*4+1000
+ 298              	.equ Ame1_s2_M2   , 33*4+1000
+ 299              	.equ Ami0_s2_M2   , 34*4+1000
+ 300              	.equ Ami1_s2_M2   , 35*4+1000
+ 301              	.equ Amo0_s2_M2   , 36*4+1000
+ 302              	.equ Amo1_s2_M2   , 37*4+1000
+ 303              	.equ Amu0_s2_M2   , 38*4+1000
+ 304              	.equ Amu1_s2_M2   , 39*4+1000
+ 305              	.equ Asa0_s2_M2   , 40*4+1000
+ 306              	.equ Asa1_s2_M2   , 41*4+1000
+ 307              	.equ Ase0_s2_M2   , 42*4+1000
+ 308              	.equ Ase1_s2_M2   , 43*4+1000
+ 309              	.equ Asi0_s2_M2   , 44*4+1000
+ 310              	.equ Asi1_s2_M2   , 45*4+1000
+ 311              	.equ Aso0_s2_M2   , 46*4+1000
+ 312              	.equ Aso1_s2_M2   , 47*4+1000
+ 313              	.equ Asu0_s2_M2   , 48*4+1000
+ 314              	.equ Asu1_s2_M2   , 49*4+1000
+ 315              	
+ 316              	
+ 317              	
+ 318              	@   --- offsets on stack
+ 319              	.equ mDa0_s0   , 0*4+1200
+ 320              	.equ mDa1_s0   , 1*4+1200
+ 321              	.equ mDe0_s0   , 2*4+1200
+ 322              	.equ mDe1_s0   , 3*4+1200
+ 323              	.equ mDi0_s0   , 4*4+1200
+ 324              	.equ mDi1_s0   , 5*4+1200
+ 325              	.equ mDo0_s0   , 6*4+1200
+ 326              	.equ mDo1_s0   , 7*4+1200
+ 327              	.equ mDu0_s0   , 8*4+1200
+ 328              	.equ mDu1_s0   , 9*4+1200
+ 329              	
+ 330              	.equ mDa0_s1   , 10*4+1200
+ 331              	.equ mDa1_s1   , 11*4+1200
+ 332              	.equ mDe0_s1   , 12*4+1200
+ 333              	.equ mDe1_s1   , 13*4+1200
+ 334              	.equ mDi0_s1   , 14*4+1200
+ 335              	.equ mDi1_s1   , 15*4+1200
+ 336              	.equ mDo0_s1   , 16*4+1200
+ 337              	.equ mDo1_s1   , 17*4+1200
+ 338              	.equ mDu0_s1   , 18*4+1200
+ 339              	.equ mDu1_s1   , 19*4+1200
+ 340              	
+ 341              	.equ mDa0_s2   , 20*4+1200
+ 342              	.equ mDa1_s2   , 21*4+1200
+ 343              	.equ mDe0_s2   , 22*4+1200
+ 344              	.equ mDe1_s2   , 23*4+1200
+ 345              	.equ mDi0_s2   , 24*4+1200
+ 346              	.equ mDi1_s2   , 25*4+1200
+ 347              	.equ mDo0_s2   , 26*4+1200
+ 348              	.equ mDo1_s2   , 27*4+1200
+ 349              	.equ mDu0_s2   , 28*4+1200
+ 350              	.equ mDu1_s2   , 29*4+1200
+ 351              	
+ 352              	.equ mRC    , 30*4+1200
+ 353              	.equ mSize  , 31*4+1200
+ 354              	
+ 355              	
+ 356              	.macro    xor5      res, i1, i2, i3, i4, i5
+ 357              	    ldr         \res, [r0, #\i1]
+ 358              	    ldr         r1, [r0, #\i2]
+ 359              	    ldr         r2, [r0, #\i3]
+ 360              	    ldr         r12, [r0, #\i4]
+ 361              	    eors        \res, \res, r1
+ 362              	    eors        \res, \res, r2
+ 363              	    eors        \res, \res, r12
+ 364              	    ldr         r1, [r0, #\i5]
+ 365              	    eors        \res, \res, r1
+ 366              	.endm
+ 367              	
+ 368              	.macro    xorrol      res, aa, bb
+ 369              	    eor         \res, \aa, \bb, ROR #31
+ 370              	.endm
+ 371              	
+ 372              	.macro    OpChi      memW, Ib0, Ib1, Ib2, Ia0, Ia1, Ia2
+ 373              	    eors r1, \Ib0, \Ia2
+ 374              	    and r2, \Ia1, \Ia2
+ 375              	    eors r1, r1, r2
+ 376              	    and r2, \Ia1, \Ib2
+ 377              	    eors r1, r1, r2
+ 378              	    and r2, \Ib1, \Ia2 
+ 379              	    eors r1, r1, r2
+ 380              	    str r1, [r0, \memW]
+ 381              	.endm
+ 382              	
+ 383              	
+ 384              	
+ 385              	.macro    KeccakThetaRhoPiChi reg_Aya, memAya, Dya, rotAya, reg_Aye, memAye, Dye, rotAye, reg_Ayi, 
+ 386              	    @THETA+RHO APPLIED TO S1
+ 387              	    push {r2, r8, r9, r10, r11, r12, lr}
+ 388              	
+ 389              	    ldr     \reg_Aya, [r0, #\memAya]
+ 390              	    ldr     \reg_Aye, [r0, #\memAye]
+ 391              	    ldr     \reg_Ayi, [r0, #\memAyi]
+ 392              	    ldr     \reg_Ayo, [r0, #\memAyo]
+ 393              	    ldr     \reg_Ayu, [r0, #\memAyu]
+ 394              	
+ 395              	
+ 396              	    eors    \reg_Aya, \reg_Aya, \Dya
+ 397              	    eors    \reg_Aye, \reg_Aye, \Dye
+ 398              	    eors    \reg_Ayi, \reg_Ayi, \Dyi
+ 399              	    eors    \reg_Ayo, \reg_Ayo, \Dyo
+ 400              	    eors    \reg_Ayu, \reg_Ayu, \Dyu
+ 401              	
+ 402              	    rors    \reg_Aya, #32-\rotAya
+ 403              	    .if  \rotAye > 0
+ 404              	        rors    \reg_Aye, #32-\rotAye
+ 405              	    .endif
+ 406              	    rors    \reg_Ayi, #32-\rotAyi
+ 407              	    rors    \reg_Ayo, #32-\rotAyo
+ 408              	    rors    \reg_Ayu, #32-\rotAyu
+ 409              	
+ 410              	
+ 411              	    str \reg_Aya, [r0, #\memAya]
+ 412              	    str \reg_Aye, [r0, #\memAye]
+ 413              	    str \reg_Ayi, [r0, #\memAyi]
+ 414              	    str \reg_Ayo, [r0, #\memAyo]
+ 415              	    str \reg_Ayu, [r0, #\memAyu]
+ 416              	
+ 417              	
+ 418              	
+ 419              	    @THETA+RHO APPLIED TO S2 
+ 420              	    
+ 421              	    ldr     \reg_AyaB, [r0, #\memAya+200]
+ 422              	    ldr     r1, [r0, #\memDya+40]
+ 423              	    ldr     \reg_AyeB, [r0, #\memAye+200]
+ 424              	    ldr     r2, [r0, #\memDye+40]
+ 425              	    ldr     \reg_AyiB, [r0, #\memAyi+200]
+ 426              	    ldr     lr, [r0, #\memDyi+40]
+ 427              	
+ 428              	    eors    \reg_AyaB, \reg_AyaB, r1
+ 429              	    eors    \reg_AyeB, \reg_AyeB, r2
+ 430              	    eors    \reg_AyiB, \reg_AyiB, lr
+ 431              	
+ 432              	    ldr     \reg_AyoB, [r0, #\memAyo+200]
+ 433              	    ldr     r1, [r0, #\memDyo+40]
+ 434              	    ldr     \reg_AyuB, [r0, #\memAyu+200]
+ 435              	    ldr     lr, [r0, #\memDyu+40]
+ 436              	    
+ 437              	    eors    \reg_AyoB, \reg_AyoB, r1
+ 438              	    eors    \reg_AyuB, \reg_AyuB, lr   
+ 439              	    
+ 440              	
+ 441              	
+ 442              	    rors    \reg_AyaB, #32-\rotAya
+ 443              	    .if  \rotAye > 0
+ 444              	        rors    \reg_AyeB, #32-\rotAye
+ 445              	    .endif
+ 446              	    rors    \reg_AyiB, #32-\rotAyi
+ 447              	    rors    \reg_AyoB, #32-\rotAyo
+ 448              	    rors    \reg_AyuB, #32-\rotAyu
+ 449              	
+ 450              	
+ 451              	
+ 452              	    @PI+CHI APPLIED TO SHARE 0 (SHARES 1 - 2)
+ 453              	    
+ 454              	    push {r1, r2}
+ 455              	    .if     \memAya < 599
+ 456              	        OpChi   #\memAya+400, r8, r9, r10, r3, r4, r5
+ 457              	        OpChi   #\memAye+400, r9, r10, r11, r4, r5, r6
+ 458              	        OpChi   #\memAyi+400, r10, r11, r12, r5, r6, r7
+ 459              	        OpChi   #\memAyo+400, r11, r12, r8, r6, r7, r3
+ 460              	        OpChi   #\memAyu+400, r12, r8, r9, r7, r3, r4
+ 461              	    .else 
+ 462              	        OpChi   #\memAya-800, r8, r9, r10, r3, r4, r5
+ 463              	        OpChi   #\memAye-800, r9, r10, r11, r4, r5, r6
+ 464              	        OpChi   #\memAyi-800, r10, r11, r12, r5, r6, r7
+ 465              	        OpChi   #\memAyo-800, r11, r12, r8, r6, r7, r3
+ 466              	        OpChi   #\memAyu-800, r12, r8, r9, r7, r3, r4
+ 467              	    .endif
+ 468              	    pop {r1, r2}
+ 469              	
+ 470              	
+ 471              	
+ 472              	    @THETA+RHO APPLIED TO S0. Stack at this point (old --> new): r8-r12: Diffusions, r3-r7: SHARE 1
+ 473              	
+ 474              	    ldr     \reg_Aya, [r0, #\memAya-200]
+ 475              	    ldr     r1, [r0, #\memDya-40]
+ 476              	    ldr     \reg_Aye, [r0, #\memAye-200]
+ 477              	    ldr     r2, [r0, #\memDye-40]
+ 478              	    ldr     \reg_Ayi, [r0, #\memAyi-200]
+ 479              	    ldr     lr, [r0, #\memDyi-40]
+ 480              	
+ 481              	    eors    \reg_Aya, \reg_Aya, r1
+ 482              	    eors    \reg_Aye, \reg_Aye, r2
+ 483              	    eors    \reg_Ayi, \reg_Ayi, lr
+ 484              	
+ 485              	
+ 486              	    ldr     \reg_Ayo, [r0, #\memAyo-200]
+ 487              	    ldr     r1, [r0, #\memDyo-40]
+ 488              	    ldr     \reg_Ayu, [r0, #\memAyu-200]
+ 489              	    ldr     lr, [r0, #\memDyu-40]
+ 490              	    
+ 491              	    eors    \reg_Ayo, \reg_Ayo, r1
+ 492              	    eors    \reg_Ayu, \reg_Ayu, lr
+ 493              	    
+ 494              	
+ 495              	    rors    \reg_Aya, #32-\rotAya
+ 496              	    .if  \rotAye > 0
+ 497              	        rors    \reg_Aye, #32-\rotAye
+ 498              	    .endif
+ 499              	    rors    \reg_Ayi, #32-\rotAyi
+ 500              	    rors    \reg_Ayo, #32-\rotAyo
+ 501              	    rors    \reg_Ayu, #32-\rotAyu
+ 502              	
+ 503              	
+ 504              	
+ 505              	    @PI+CHI APPLIED TO SHARE 1 (SHARES 2 - 0)
+ 506              	    push {r1, r2}
+ 507              	    .if     \memAya < 599
+ 508              	        OpChi   #\memAya+600, r3, r4, r5, r8, r9, r10
+ 509              	        OpChi   #\memAye+600, r4, r5, r6, r9, r10, r11
+ 510              	        OpChi   #\memAyi+600, r5, r6, r7, r10, r11, r12
+ 511              	        OpChi   #\memAyo+600, r6, r7, r3, r11, r12, r8
+ 512              	        OpChi   #\memAyu+600, r7, r3, r4, r12, r8, r9
+ 513              	    .else 
+ 514              	        OpChi   #\memAya-600, r3, r4, r5, r8, r9, r10
+ 515              	        OpChi   #\memAye-600, r4, r5, r6, r9, r10, r11
+ 516              	        OpChi   #\memAyi-600, r5, r6, r7, r10, r11, r12
+ 517              	        OpChi   #\memAyo-600, r6, r7, r3, r11, r12, r8
+ 518              	        OpChi   #\memAyu-600, r7, r3, r4, r12, r8, r9
+ 519              	    .endif
+ 520              	    pop {r1, r2}
+ 521              	
+ 522              	
+ 523              	    @PI+CHI APPLIED TO SHARE 2 (SHARES 0 - 1). Stack at this point (old --> new): r8-r12: Diffusion
+ 524              	    
+ 525              	
+ 526              	    ldr     \reg_AyaB, [r0, #\memAya]             
+ 527              	    ldr     \reg_AyeB, [r0, #\memAye]         
+ 528              	    ldr     \reg_AyiB, [r0, #\memAyi]            
+ 529              	    ldr     \reg_AyoB, [r0, #\memAyo]           
+ 530              	    ldr     \reg_AyuB, [r0, #\memAyu]           
+ 531              	
+ 532              	    push {r1, r2}
+ 533              	    .if     \memAya < 599
+ 534              	        OpChi   #\memAya+800, r8, r9, r10, r3, r4, r5
+ 535              	        OpChi   #\memAye+800, r9, r10, r11, r4, r5, r6
+ 536              	        OpChi   #\memAyi+800, r10, r11, r12, r5, r6, r7
+ 537              	        OpChi   #\memAyo+800, r11, r12, r8, r6, r7, r3
+ 538              	        OpChi   #\memAyu+800, r12, r8, r9, r7, r3, r4
+ 539              	    .else 
+ 540              	        OpChi   #\memAya-400, r8, r9, r10, r3, r4, r5
+ 541              	        OpChi   #\memAye-400, r9, r10, r11, r4, r5, r6
+ 542              	        OpChi   #\memAyi-400, r10, r11, r12, r5, r6, r7
+ 543              	        OpChi   #\memAyo-400, r11, r12, r8, r6, r7, r3
+ 544              	        OpChi   #\memAyu-400, r12, r8, r9, r7, r3, r4
+ 545              	    .endif
+ 546              	    pop {r1, r2}
+ 547              	
+ 548              	
+ 549              	    pop {r2, r8, r9, r10, r11, r12, lr}
+ 550              	.endm
+ 551              	
+ 552              	
+ 553              	
+ 554              	
+ 555              	
+ 556              	.macro    KeccakThetaRhoPiChiIota  memAya, Dya, memAye, Dye, rotAye, memAyi, Dyi, rotAyi, memAyo, D
+ 557              	    
+ 558              	    @THETA+RHO APPLIED TO S1
+ 559              	    push {r2, r8, r9, r10, r11, r12, lr}
+ 560              	
+ 561              	    ldr     r3, [r0, #\memAya]
+ 562              	    ldr     r4, [r0, #\memAye]
+ 563              	    ldr     r5, [r0, #\memAyi]
+ 564              	    ldr     r6, [r0, #\memAyo]
+ 565              	    ldr     r7, [r0, #\memAyu]
+ 566              	
+ 567              	
+ 568              	    eors    r3, r3, \Dya
+ 569              	    eors    r4, r4, \Dye
+ 570              	    eors    r5, r5, \Dyi
+ 571              	    eors    r6, r6, \Dyo
+ 572              	    eors    r7, r7, \Dyu
+ 573              	
+ 574              	    .if  \rotAye > 0
+ 575              	        rors    r4, #32-\rotAye
+ 576              	    .endif
+ 577              	    rors    r5, #32-\rotAyi
+ 578              	    rors    r6, #32-\rotAyo
+ 579              	    rors    r7, #32-\rotAyu
+ 580              	
+ 581              	
+ 582              	    str r3, [r0, #\memAya]
+ 583              	    str r4, [r0, #\memAye]
+ 584              	    str r5, [r0, #\memAyi]
+ 585              	    str r6, [r0, #\memAyo]
+ 586              	    str r7, [r0, #\memAyu]
+ 587              	
+ 588              	
+ 589              	
+ 590              	    @THETA+RHO APPLIED TO S2 
+ 591              	    
+ 592              	    ldr     r8, [r0, #\memAya+200]
+ 593              	    ldr     r1, [r0, #\memDya+40]
+ 594              	    ldr     r9, [r0, #\memAye+200]
+ 595              	    ldr     r2, [r0, #\memDye+40]
+ 596              	    ldr     r10, [r0, #\memAyi+200]
+ 597              	    ldr     lr, [r0, #\memDyi+40]
+ 598              	
+ 599              	    eors    r8, r8, r1
+ 600              	    eors    r9, r9, r2
+ 601              	    eors    r10, r10, lr
+ 602              	
+ 603              	    ldr     r11, [r0, #\memAyo+200]
+ 604              	    ldr     r1, [r0, #\memDyo+40]
+ 605              	    ldr     r12, [r0, #\memAyu+200]
+ 606              	    ldr     lr, [r0, #\memDyu+40]
+ 607              	    
+ 608              	    eors    r11, r11, r1
+ 609              	    eors    r12, r12, lr
+ 610              	    
+ 611              	    .if  \rotAye > 0
+ 612              	        rors    r9, #32-\rotAye
+ 613              	    .endif
+ 614              	    rors    r10, #32-\rotAyi
+ 615              	    rors    r11, #32-\rotAyo
+ 616              	    rors    r12, #32-\rotAyu
+ 617              	
+ 618              	
+ 619              	
+ 620              	
+ 621              	    @PI+CHI APPLIED TO SHARE 0 (SHARES 1 - 2)
+ 622              	
+ 623              	    push {r1, r2}
+ 624              	    .if     \memAya < 599
+ 625              	        OpChi   #\memAya+400, r8, r9, r10, r3, r4, r5
+ 626              	        OpChi   #\memAye+400, r9, r10, r11, r4, r5, r6
+ 627              	        OpChi   #\memAyi+400, r10, r11, r12, r5, r6, r7
+ 628              	        OpChi   #\memAyo+400, r11, r12, r8, r6, r7, r3
+ 629              	        OpChi   #\memAyu+400, r12, r8, r9, r7, r3, r4
+ 630              	    .else 
+ 631              	        OpChi   #\memAya-800, r8, r9, r10, r3, r4, r5
+ 632              	        OpChi   #\memAye-800, r9, r10, r11, r4, r5, r6
+ 633              	        OpChi   #\memAyi-800, r10, r11, r12, r5, r6, r7
+ 634              	        OpChi   #\memAyo-800, r11, r12, r8, r6, r7, r3
+ 635              	        OpChi   #\memAyu-800, r12, r8, r9, r7, r3, r4
+ 636              	    .endif
+ 637              	    pop {r1, r2}
+ 638              	
+ 639              	
+ 640              	
+ 641              	
+ 642              	    @THETA+RHO APPLIED TO S0. Stack at this point (old --> new): r8-r12: Diffusions, r3-r7: SHARE 1
+ 643              	
+ 644              	    ldr     r3, [r0, #\memAya-200]
+ 645              	    ldr     r1, [r0, #\memDya-40]
+ 646              	    ldr     r4, [r0, #\memAye-200]
+ 647              	    ldr     r2, [r0, #\memDye-40]
+ 648              	    ldr     r5, [r0, #\memAyi-200]
+ 649              	    ldr     lr, [r0, #\memDyi-40]
+ 650              	
+ 651              	    eors    r3, r3, r1
+ 652              	    eors    r4, r4, r2
+ 653              	    eors    r5, r5, lr
+ 654              	
+ 655              	
+ 656              	    ldr     r6, [r0, #\memAyo-200]
+ 657              	    ldr     r1, [r0, #\memDyo-40]
+ 658              	    ldr     r7, [r0, #\memAyu-200]
+ 659              	    ldr     lr, [r0, #\memDyu-40]
+ 660              	    
+ 661              	    eors    r6, r6, r1
+ 662              	    eors    r7, r7, lr
+ 663              	
+ 664              	    .if  \rotAye > 0
+ 665              	        rors    r4, #32-\rotAye
+ 666              	    .endif
+ 667              	    rors    r5, #32-\rotAyi
+ 668              	    rors    r6, #32-\rotAyo
+ 669              	    rors    r7, #32-\rotAyu
+ 670              	
+ 671              	
+ 672              	
+ 673              	
+ 674              	    @PI+CHI APPLIED TO SHARE 1 (SHARES 2 - 0)
+ 675              	
+ 676              	    push {r1, r2}
+ 677              	    .if     \memAya < 599
+ 678              	        OpChi   #\memAya+600, r3, r4, r5, r8, r9, r10
+ 679              	        OpChi   #\memAye+600, r4, r5, r6, r9, r10, r11
+ 680              	        OpChi   #\memAyi+600, r5, r6, r7, r10, r11, r12
+ 681              	        OpChi   #\memAyo+600, r6, r7, r3, r11, r12, r8
+ 682              	        OpChi   #\memAyu+600, r7, r3, r4, r12, r8, r9
+ 683              	    .else 
+ 684              	        OpChi   #\memAya-600, r3, r4, r5, r8, r9, r10
+ 685              	        OpChi   #\memAye-600, r4, r5, r6, r9, r10, r11
+ 686              	        OpChi   #\memAyi-600, r5, r6, r7, r10, r11, r12
+ 687              	        OpChi   #\memAyo-600, r6, r7, r3, r11, r12, r8
+ 688              	        OpChi   #\memAyu-600, r7, r3, r4, r12, r8, r9
+ 689              	    .endif
+ 690              	    pop {r1, r2}
+ 691              	
+ 692              	
+ 693              	
+ 694              	    @PI+CHI APPLIED TO SHARE 2 (SHARES 0 - 1). Stack at this point (old --> new): r8-r12: Diffusion
+ 695              	    
+ 696              	    ldr     r8, [r0, #\memAya]
+ 697              	    ldr     r9, [r0, #\memAye]
+ 698              	    ldr     r10, [r0, #\memAyi]
+ 699              	    ldr     r11, [r0, #\memAyo]
+ 700              	    ldr     r12, [r0, #\memAyu]
+ 701              	
+ 702              	    push {r1, r2}
+ 703              	    .if     \memAya < 599
+ 704              	        OpChi   #\memAya+800, r8, r9, r10, r3, r4, r5
+ 705              	        OpChi   #\memAye+800, r9, r10, r11, r4, r5, r6
+ 706              	        OpChi   #\memAyi+800, r10, r11, r12, r5, r6, r7
+ 707              	        OpChi   #\memAyo+800, r11, r12, r8, r6, r7, r3
+ 708              	        OpChi   #\memAyu+800, r12, r8, r9, r7, r3, r4
+ 709              	    .else 
+ 710              	        OpChi   #\memAya-400, r8, r9, r10, r3, r4, r5
+ 711              	        OpChi   #\memAye-400, r9, r10, r11, r4, r5, r6
+ 712              	        OpChi   #\memAyi-400, r10, r11, r12, r5, r6, r7
+ 713              	        OpChi   #\memAyo-400, r11, r12, r8, r6, r7, r3
+ 714              	        OpChi   #\memAyu-400, r12, r8, r9, r7, r3, r4
+ 715              	    .endif
+ 716              	    pop {r1, r2}
+ 717              	
+ 718              	    ldr     r1, [r0, #mRC]
+ 719              	 
+ 720              	    @INICIO NUEVO IOTA
+ 721              	    .if     \memAya <599
+ 722              	        ldr     r2, [r0, #\memAya+800]
+ 723              	    .else
+ 724              	        ldr     r2, [r0, #\memAya-400]
+ 725              	    .endif
+ 726              	    ldr r4, [r1, #\offset]
+ 727              	    eors r2, r2, r4
+ 728              	    .if     \memAya <599
+ 729              	        str     r2, [r0, #\memAya+800]
+ 730              	    .else
+ 731              	        str     r2, [r0, #\memAya-400]
+ 732              	    .endif
+ 733              	    @FIN NUEVO IOTA
+ 734              	
+ 735              	
+ 736              	    .if  \last == 1
+ 737              	    ldr     r4, [r1, #32]!
+ 738              	    str     r1, [r0, #mRC]
+ 739              	    cmp     r4, #0xFF
+ 740              	    .endif
+ 741              	
+ 742              	
+ 743              	
+ 744              	    pop {r2, r8, r9, r10, r11, r12, lr}
+ 745              	.endm
+ 746              	
+ 747              	
+ 748              	
+ 749              	.macro    KeccakRound0
+ 750              	
+ 751              	    @DIFFUSION SHARE 0
+ 752              	    xor5        r3,  Abu0_s0, Agu0_s0, Aku0_s0, Amu0_s0, Asu0_s0
+ 753              	    xor5        r7, Abe1_s0, Age1_s0, Ake1_s0, Ame1_s0, Ase1_s0
+ 754              	    xorrol      r6, r3, r7
+ 755              	    str         r6, [r0, #mDa0_s0]
+ 756              	    xor5        r6,  Abu1_s0, Agu1_s0, Aku1_s0, Amu1_s0, Asu1_s0
+ 757              	    xor5        lr, Abe0_s0, Age0_s0, Ake0_s0, Ame0_s0, Ase0_s0
+ 758              	    eors        r8, r6, lr
+ 759              	    str         r8, [r0, #mDa1_s0]
+ 760              	
+ 761              	    xor5        r5,  Abi0_s0, Agi0_s0, Aki0_s0, Ami0_s0, Asi0_s0
+ 762              	    xorrol      r9, r5, r6
+ 763              	    str         r9, [r0, #mDo0_s0]
+ 764              	    xor5        r4,  Abi1_s0, Agi1_s0, Aki1_s0, Ami1_s0, Asi1_s0
+ 765              	    eors        r3, r3, r4
+ 766              	    str         r3, [r0, #mDo1_s0]
+ 767              	
+ 768              	    xor5        r3,  Aba0_s0, Aga0_s0, Aka0_s0, Ama0_s0, Asa0_s0
+ 769              	    xorrol      r10, r3, r4
+ 770              	    str         r10, [r0, #mDe0_s0]
+ 771              	    xor5        r6,  Aba1_s0, Aga1_s0, Aka1_s0, Ama1_s0, Asa1_s0
+ 772              	    eors        r11, r6, r5
+ 773              	    str         r11, [r0, #mDe1_s0]
+ 774              	
+ 775              	    xor5        r4,  Abo1_s0, Ago1_s0, Ako1_s0, Amo1_s0, Aso1_s0
+ 776              	    xorrol      r5, lr, r4
+ 777              	    str         r5, [r0, #mDi0_s0]
+ 778              	    xor5        r5,  Abo0_s0, Ago0_s0, Ako0_s0, Amo0_s0, Aso0_s0
+ 779              	    eors        r2, r7, r5
+ 780              	    str         r2, [r0, #mDi1_s0]
+ 781              	
+ 782              	    xorrol      r12, r5, r6
+ 783              	    str         r12, [r0, #mDu0_s0]
+ 784              	    eors        lr, r4, r3
+ 785              	    str         lr, [r0, #mDu1_s0]
+ 786              	
+ 787              	    @DIFFUSION SHARE 2
+ 788              	    xor5        r3,  Abu0_s2, Agu0_s2, Aku0_s2, Amu0_s2, Asu0_s2
+ 789              	    xor5        r7, Abe1_s2, Age1_s2, Ake1_s2, Ame1_s2, Ase1_s2
+ 790              	    xorrol      r6, r3, r7
+ 791              	    str         r6, [r0, #mDa0_s2]
+ 792              	    xor5        r6,  Abu1_s2, Agu1_s2, Aku1_s2, Amu1_s2, Asu1_s2
+ 793              	    xor5        lr, Abe0_s2, Age0_s2, Ake0_s2, Ame0_s2, Ase0_s2
+ 794              	    eors        r8, r6, lr
+ 795              	    str         r8, [r0, #mDa1_s2]
+ 796              	
+ 797              	    xor5        r5,  Abi0_s2, Agi0_s2, Aki0_s2, Ami0_s2, Asi0_s2
+ 798              	    xorrol      r9, r5, r6
+ 799              	    str         r9, [r0, #mDo0_s2]
+ 800              	    xor5        r4,  Abi1_s2, Agi1_s2, Aki1_s2, Ami1_s2, Asi1_s2
+ 801              	    eors        r3, r3, r4
+ 802              	    str         r3, [r0, #mDo1_s2]
+ 803              	
+ 804              	    xor5        r3,  Aba0_s2, Aga0_s2, Aka0_s2, Ama0_s2, Asa0_s2
+ 805              	    xorrol      r10, r3, r4
+ 806              	    str         r10, [r0, #mDe0_s2]
+ 807              	    xor5        r6,  Aba1_s2, Aga1_s2, Aka1_s2, Ama1_s2, Asa1_s2
+ 808              	    eors        r11, r6, r5
+ 809              	    str         r11, [r0, #mDe1_s2]
+ 810              	
+ 811              	    xor5        r4,  Abo1_s2, Ago1_s2, Ako1_s2, Amo1_s2, Aso1_s2
+ 812              	    xorrol      r5, lr, r4
+ 813              	    str         r5, [r0, #mDi0_s2]
+ 814              	    xor5        r5,  Abo0_s2, Ago0_s2, Ako0_s2, Amo0_s2, Aso0_s2
+ 815              	    eors        r2, r7, r5
+ 816              	    str         r2, [r0, #mDi1_s2]
+ 817              	
+ 818              	    xorrol      r12, r5, r6
+ 819              	    str         r12, [r0, #mDu0_s2]
+ 820              	    eors        lr, r4, r3
+ 821              	    str         lr, [r0, #mDu1_s2]
+ 822              	
+ 823              	    @DIFFUSION SHARE 1
+ 824              	    xor5        r3,  Abu0_s1, Agu0_s1, Aku0_s1, Amu0_s1, Asu0_s1
+ 825              	    xor5        r7, Abe1_s1, Age1_s1, Ake1_s1, Ame1_s1, Ase1_s1
+ 826              	    xorrol      r6, r3, r7
+ 827              	    str         r6, [r0, #mDa0_s1]
+ 828              	    xor5        r6,  Abu1_s1, Agu1_s1, Aku1_s1, Amu1_s1, Asu1_s1
+ 829              	    xor5        lr, Abe0_s1, Age0_s1, Ake0_s1, Ame0_s1, Ase0_s1
+ 830              	    eors        r8, r6, lr
+ 831              	    str         r8, [r0, #mDa1_s1]
+ 832              	
+ 833              	    xor5        r5,  Abi0_s1, Agi0_s1, Aki0_s1, Ami0_s1, Asi0_s1
+ 834              	    xorrol      r9, r5, r6
+ 835              	    str         r9, [r0, #mDo0_s1]
+ 836              	    xor5        r4,  Abi1_s1, Agi1_s1, Aki1_s1, Ami1_s1, Asi1_s1
+ 837              	    eors        r3, r3, r4
+ 838              	    str         r3, [r0, #mDo1_s1]
+ 839              	
+ 840              	    xor5        r3,  Aba0_s1, Aga0_s1, Aka0_s1, Ama0_s1, Asa0_s1
+ 841              	    xorrol      r10, r3, r4
+ 842              	    str         r10, [r0, #mDe0_s1]
+ 843              	    xor5        r6,  Aba1_s1, Aga1_s1, Aka1_s1, Ama1_s1, Asa1_s1
+ 844              	    eors        r11, r6, r5
+ 845              	    str         r11, [r0, #mDe1_s1]
+ 846              	
+ 847              	    xor5        r4,  Abo1_s1, Ago1_s1, Ako1_s1, Amo1_s1, Aso1_s1
+ 848              	    xorrol      r5, lr, r4
+ 849              	    str         r5, [r0, #mDi0_s1]
+ 850              	    xor5        r5,  Abo0_s1, Ago0_s1, Ako0_s1, Amo0_s1, Aso0_s1
+ 851              	    eors        r2, r7, r5
+ 852              	    str         r2, [r0, #mDi1_s1]
+ 853              	
+ 854              	    xorrol      r12, r5, r6
+ 855              	    str         r12, [r0, #mDu0_s1]
+ 856              	    eors        lr, r4, r3
+ 857              	    str         lr, [r0, #mDu1_s1]
+ 858              	
+ 859              	
+ 860              	
+ 861              	    KeccakThetaRhoPiChi r5, Aka1_s1, r8,  2, r6, Ame1_s1, r11, 23, r7, Asi1_s1, r2, 31, r3, Abo0_s1
+ 862              	    KeccakThetaRhoPiChi r7, Asa1_s1, r8,  9, r3, Abe0_s1, r10,  0, r4, Agi1_s1, r2,  3, r5, Ako0_s1
+ 863              	    ldr         r8, [r0, #mDa0_s1]
+ 864              	    KeccakThetaRhoPiChi r4, Aga0_s1, r8, 18, r5, Ake0_s1, r10,  5, r6, Ami1_s1, r2,  8, r7, Aso0_s1
+ 865              	    KeccakThetaRhoPiChi r6, Ama0_s1, r8, 20, r7, Ase1_s1, r11,  1, r3, Abi1_s1, r2, 31, r4, Ago0_s1
+ 866              	    ldr         r9, [r0, #mDo1_s1]
+ 867              	    KeccakThetaRhoPiChiIota  Aba0_s1, r8,          Age0_s1, r10, 22,      Aki1_s1, r2, 22,      Amo
+ 868              	
+ 869              	    ldr         r2, [r0, #mDi0_s1]
+ 870              	    KeccakThetaRhoPiChi r5, Aka0_s1, r8,  1, r6, Ame0_s1, r10, 22, r7, Asi0_s1, r2, 30, r3, Abo1_s1
+ 871              	    KeccakThetaRhoPiChi r7, Asa0_s1, r8,  9, r3, Abe1_s1, r11,  1, r4, Agi0_s1, r2,  3, r5, Ako1_s1
+ 872              	    ldr         r8, [r0, #mDa1_s1]
+ 873              	    KeccakThetaRhoPiChi r4, Aga1_s1, r8, 18, r5, Ake1_s1, r11,  5, r6, Ami0_s1, r2,  7, r7, Aso1_s1
+ 874              	    KeccakThetaRhoPiChi r6, Ama1_s1, r8, 21, r7, Ase0_s1, r10,  1, r3, Abi0_s1, r2, 31, r4, Ago1_s1
+ 875              	    ldr         r9, [r0, #mDo0_s1]
+ 876              	    KeccakThetaRhoPiChiIota  Aba1_s1, r8,          Age1_s1, r11, 22,      Aki0_s1, r2, 21,      Amo
+ 877              	.endm
+ 878              	
+ 879              	    
+ 880              	
+ 881              	.macro    KeccakRound1
+ 882              	    @DIFFUSION SHARE 0
+ 883              	    xor5        r3,  Asu0_s0_M2, Agu0_s0_M2, Amu0_s0_M2, Abu1_s0_M2, Aku1_s0_M2
+ 884              	    xor5        r7,  Age1_s0_M2, Ame0_s0_M2, Abe0_s0_M2, Ake1_s0_M2, Ase1_s0_M2
+ 885              	    xorrol      r6, r3, r7
+ 886              	    str         r6, [r0, #mDa0_s0]
+ 887              	    xor5        r6,  Asu1_s0_M2, Agu1_s0_M2, Amu1_s0_M2, Abu0_s0_M2, Aku0_s0_M2
+ 888              	    xor5        lr,  Age0_s0_M2, Ame1_s0_M2, Abe1_s0_M2, Ake0_s0_M2, Ase0_s0_M2
+ 889              	    eors        r8, r6, lr
+ 890              	    str         r8, [r0, #mDa1_s0]
+ 891              	
+ 892              	    xor5        r5,  Aki1_s0_M2, Asi1_s0_M2, Agi0_s0_M2, Ami1_s0_M2, Abi0_s0_M2
+ 893              	    xorrol      r9, r5, r6
+ 894              	    str         r9, [r0, #mDo0_s0]
+ 895              	    xor5        r4,  Aki0_s0_M2, Asi0_s0_M2, Agi1_s0_M2, Ami0_s0_M2, Abi1_s0_M2
+ 896              	    eors        r3, r3, r4
+ 897              	    str         r3, [r0, #mDo1_s0]
+ 898              	
+ 899              	    xor5        r3,  Aba0_s0_M2, Aka1_s0_M2, Asa0_s0_M2, Aga0_s0_M2, Ama1_s0_M2
+ 900              	    xorrol      r10, r3, r4
+ 901              	    str         r10, [r0, #mDe0_s0]
+ 902              	    xor5        r6,  Aba1_s0_M2, Aka0_s0_M2, Asa1_s0_M2, Aga1_s0_M2, Ama0_s0_M2
+ 903              	    eors        r11, r6, r5
+ 904              	    str         r11, [r0, #mDe1_s0]
+ 905              	
+ 906              	    xor5        r4,  Amo0_s0_M2, Abo1_s0_M2, Ako0_s0_M2, Aso1_s0_M2, Ago0_s0_M2
+ 907              	    xorrol      r5, lr, r4
+ 908              	    str         r5, [r0, #mDi0_s0]
+ 909              	    xor5        r5,  Amo1_s0_M2, Abo0_s0_M2, Ako1_s0_M2, Aso0_s0_M2, Ago1_s0_M2
+ 910              	    eors        r2, r7, r5
+ 911              	    str         r2, [r0, #mDi1_s0]
+ 912              	
+ 913              	    xorrol      r12, r5, r6
+ 914              	    str         r12, [r0, #mDu0_s0]
+ 915              	    eors        lr, r4, r3
+ 916              	    str         lr, [r0, #mDu1_s0]
+ 917              	
+ 918              	
+ 919              	
+ 920              	    @DIFFUSION SHARE 2
+ 921              	    xor5        r3,  Asu0_s2_M2, Agu0_s2_M2, Amu0_s2_M2, Abu1_s2_M2, Aku1_s2_M2
+ 922              	    xor5        r7,  Age1_s2_M2, Ame0_s2_M2, Abe0_s2_M2, Ake1_s2_M2, Ase1_s2_M2
+ 923              	    xorrol      r6, r3, r7
+ 924              	    str         r6, [r0, #mDa0_s2]
+ 925              	    xor5        r6,  Asu1_s2_M2, Agu1_s2_M2, Amu1_s2_M2, Abu0_s2_M2, Aku0_s2_M2
+ 926              	    xor5        lr,  Age0_s2_M2, Ame1_s2_M2, Abe1_s2_M2, Ake0_s2_M2, Ase0_s2_M2
+ 927              	    eors        r8, r6, lr
+ 928              	    str         r8, [r0, #mDa1_s2]
+ 929              	
+ 930              	    xor5        r5,  Aki1_s2_M2, Asi1_s2_M2, Agi0_s2_M2, Ami1_s2_M2, Abi0_s2_M2
+ 931              	    xorrol      r9, r5, r6
+ 932              	    str         r9, [r0, #mDo0_s2]
+ 933              	    xor5        r4,  Aki0_s2_M2, Asi0_s2_M2, Agi1_s2_M2, Ami0_s2_M2, Abi1_s2_M2
+ 934              	    eors        r3, r3, r4
+ 935              	    str         r3, [r0, #mDo1_s2]
+ 936              	
+ 937              	    xor5        r3,  Aba0_s2_M2, Aka1_s2_M2, Asa0_s2_M2, Aga0_s2_M2, Ama1_s2_M2
+ 938              	    xorrol      r10, r3, r4
+ 939              	    str         r10, [r0, #mDe0_s2]
+ 940              	    xor5        r6,  Aba1_s2_M2, Aka0_s2_M2, Asa1_s2_M2, Aga1_s2_M2, Ama0_s2_M2
+ 941              	    eors        r11, r6, r5
+ 942              	    str         r11, [r0, #mDe1_s2]
+ 943              	
+ 944              	    xor5        r4,  Amo0_s2_M2, Abo1_s2_M2, Ako0_s2_M2, Aso1_s2_M2, Ago0_s2_M2
+ 945              	    xorrol      r5, lr, r4
+ 946              	    str         r5, [r0, #mDi0_s2]
+ 947              	    xor5        r5,  Amo1_s2_M2, Abo0_s2_M2, Ako1_s2_M2, Aso0_s2_M2, Ago1_s2_M2
+ 948              	    eors        r2, r7, r5
+ 949              	    str         r2, [r0, #mDi1_s2]
+ 950              	
+ 951              	    xorrol      r12, r5, r6
+ 952              	    str         r12, [r0, #mDu0_s2]
+ 953              	    eors        lr, r4, r3
+ 954              	    str         lr, [r0, #mDu1_s2]
+ 955              	
+ 956              	    @DIFFUSION SHARE 1
+ 957              	    xor5        r3,  Asu0_s1_M2, Agu0_s1_M2, Amu0_s1_M2, Abu1_s1_M2, Aku1_s1_M2
+ 958              	    xor5        r7,  Age1_s1_M2, Ame0_s1_M2, Abe0_s1_M2, Ake1_s1_M2, Ase1_s1_M2
+ 959              	    xorrol      r6, r3, r7
+ 960              	    str         r6, [r0, #mDa0_s1]
+ 961              	    xor5        r6,  Asu1_s1_M2, Agu1_s1_M2, Amu1_s1_M2, Abu0_s1_M2, Aku0_s1_M2
+ 962              	    xor5        lr,  Age0_s1_M2, Ame1_s1_M2, Abe1_s1_M2, Ake0_s1_M2, Ase0_s1_M2
+ 963              	    eors        r8, r6, lr
+ 964              	    str         r8, [r0, #mDa1_s1]
+ 965              	
+ 966              	    xor5        r5,  Aki1_s1_M2, Asi1_s1_M2, Agi0_s1_M2, Ami1_s1_M2, Abi0_s1_M2
+ 967              	    xorrol      r9, r5, r6
+ 968              	    str         r9, [r0, #mDo0_s1]
+ 969              	    xor5        r4,  Aki0_s1_M2, Asi0_s1_M2, Agi1_s1_M2, Ami0_s1_M2, Abi1_s1_M2
+ 970              	    eors        r3, r3, r4
+ 971              	    str         r3, [r0, #mDo1_s1]
+ 972              	
+ 973              	    xor5        r3,  Aba0_s1_M2, Aka1_s1_M2, Asa0_s1_M2, Aga0_s1_M2, Ama1_s1_M2
+ 974              	    xorrol      r10, r3, r4
+ 975              	    str         r10, [r0, #mDe0_s1]
+ 976              	    xor5        r6,  Aba1_s1_M2, Aka0_s1_M2, Asa1_s1_M2, Aga1_s1_M2, Ama0_s1_M2
+ 977              	    eors        r11, r6, r5
+ 978              	    str         r11, [r0, #mDe1_s1]
+ 979              	
+ 980              	    xor5        r4,  Amo0_s1_M2, Abo1_s1_M2, Ako0_s1_M2, Aso1_s1_M2, Ago0_s1_M2
+ 981              	    xorrol      r5, lr, r4
+ 982              	    str         r5, [r0, #mDi0_s1]
+ 983              	    xor5        r5,  Amo1_s1_M2, Abo0_s1_M2, Ako1_s1_M2, Aso0_s1_M2, Ago1_s1_M2
+ 984              	    eors        r2, r7, r5
+ 985              	    str         r2, [r0, #mDi1_s1]
+ 986              	
+ 987              	    xorrol      r12, r5, r6
+ 988              	    str         r12, [r0, #mDu0_s1]
+ 989              	    eors        lr, r4, r3
+ 990              	    str         lr, [r0, #mDu1_s1]
+ 991              	
+ 992              	
+ 993              	    KeccakThetaRhoPiChi r5, Asa1_s1_M2, r8,  2, r6, Ake1_s1_M2, r11, 23, r7, Abi1_s1_M2, r2, 31, r3
+ 994              	    KeccakThetaRhoPiChi r7, Ama0_s1_M2, r8,  9, r3, Age0_s1_M2, r10,  0, r4, Asi0_s1_M2, r2,  3, r5
+ 995              	    ldr         r8, [r0, #mDa0_s1]
+ 996              	    KeccakThetaRhoPiChi r4, Aka1_s1_M2, r8, 18, r5, Abe1_s1_M2, r10,  5, r6, Ami0_s1_M2, r2,  8, r7
+ 997              	    KeccakThetaRhoPiChi r6, Aga0_s1_M2, r8, 20, r7, Ase1_s1_M2, r11,  1, r3, Aki0_s1_M2, r2, 31, r4
+ 998              	    ldr         r9, [r0, #mDo1_s1]
+ 999              	    KeccakThetaRhoPiChiIota  Aba0_s1_M2, r8,          Ame1_s1_M2, r10, 22,      Agi1_s1_M2, r2, 22,
+ 1000              	
+ 1001              	    ldr         r2, [r0, #mDi0_s1]
+ 1002              	    KeccakThetaRhoPiChi r5, Asa0_s1_M2, r8,  1, r6, Ake0_s1_M2, r10, 22, r7, Abi0_s1_M2, r2, 30, r3
+ 1003              	    KeccakThetaRhoPiChi r7, Ama1_s1_M2, r8,  9, r3, Age1_s1_M2, r11,  1, r4, Asi1_s1_M2, r2,  3, r5
+ 1004              	    ldr         r8, [r0, #mDa1_s1]
+ 1005              	    KeccakThetaRhoPiChi r4, Aka0_s1_M2, r8, 18, r5, Abe0_s1_M2, r11,  5, r6, Ami1_s1_M2, r2,  7, r7
+ 1006              	    KeccakThetaRhoPiChi r6, Aga1_s1_M2, r8, 21, r7, Ase0_s1_M2, r10,  1, r3, Aki1_s1_M2, r2, 31, r4
+ 1007              	    ldr         r9, [r0, #mDo0_s1]
+ 1008              	    KeccakThetaRhoPiChiIota  Aba1_s1_M2, r8,          Ame0_s1_M2, r11, 22,      Agi0_s1_M2, r2, 21,
+ 1009              	
+ 1010              	.endm
+ 1011              	
+ 1012              	
+ 1013              	.macro KeccakRound2
+ 1014              	    @DIFFUSION SHARE 0
+ 1015              	    xor5        r3, Aku1_s0, Agu0_s0, Abu1_s0, Asu1_s0, Amu1_s0
+ 1016              	    xor5        r7, Ame0_s0, Ake0_s0, Age0_s0, Abe0_s0, Ase1_s0
+ 1017              	    xorrol      r6, r3, r7
+ 1018              	    str         r6, [r0, #mDa0_s0]
+ 1019              	    xor5        r6,  Aku0_s0, Agu1_s0, Abu0_s0, Asu0_s0, Amu0_s0
+ 1020              	    xor5        lr, Ame1_s0, Ake1_s0, Age1_s0, Abe1_s0, Ase0_s0
+ 1021              	    eors        r8, r6, lr
+ 1022              	    str         r8, [r0, #mDa1_s0]
+ 1023              	
+ 1024              	    xor5        r5,  Agi1_s0, Abi1_s0, Asi1_s0, Ami0_s0, Aki1_s0
+ 1025              	    xorrol      r9, r5, r6
+ 1026              	    str         r9, [r0, #mDo0_s0]
+ 1027              	    xor5        r4,  Agi0_s0, Abi0_s0, Asi0_s0, Ami1_s0, Aki0_s0
+ 1028              	    eors        r3, r3, r4
+ 1029              	    str         r3, [r0, #mDo1_s0]
+ 1030              	
+ 1031              	    xor5        r3,  Aba0_s0, Asa1_s0, Ama1_s0, Aka1_s0, Aga1_s0
+ 1032              	    xorrol      r10, r3, r4
+ 1033              	    str         r10, [r0, #mDe0_s0]
+ 1034              	    xor5        r6,  Aba1_s0, Asa0_s0, Ama0_s0, Aka0_s0, Aga0_s0
+ 1035              	    eors        r11, r6, r5
+ 1036              	    str         r11, [r0, #mDe1_s0]
+ 1037              	
+ 1038              	    xor5        r4,  Aso0_s0, Amo0_s0, Ako1_s0, Ago0_s0, Abo0_s0
+ 1039              	    xorrol      r5, lr, r4
+ 1040              	    str         r5, [r0, #mDi0_s0]
+ 1041              	    xor5        r5,  Aso1_s0, Amo1_s0, Ako0_s0, Ago1_s0, Abo1_s0
+ 1042              	    eors        r2, r7, r5
+ 1043              	    str         r2, [r0, #mDi1_s0]
+ 1044              	
+ 1045              	    xorrol      r12, r5, r6
+ 1046              	    str         r12, [r0, #mDu0_s0]
+ 1047              	    eors        lr, r4, r3
+ 1048              	    str         lr, [r0, #mDu1_s0]
+ 1049              	
+ 1050              	
+ 1051              	    @DIFFUSION SHARE 2
+ 1052              	    xor5        r3, Aku1_s2, Agu0_s2, Abu1_s2, Asu1_s2, Amu1_s2
+ 1053              	    xor5        r7, Ame0_s2, Ake0_s2, Age0_s2, Abe0_s2, Ase1_s2
+ 1054              	    xorrol      r6, r3, r7
+ 1055              	    str         r6, [r0, #mDa0_s2]
+ 1056              	    xor5        r6,  Aku0_s2, Agu1_s2, Abu0_s2, Asu0_s2, Amu0_s2
+ 1057              	    xor5        lr, Ame1_s2, Ake1_s2, Age1_s2, Abe1_s2, Ase0_s2
+ 1058              	    eors        r8, r6, lr
+ 1059              	    str         r8, [r0, #mDa1_s2]
+ 1060              	
+ 1061              	    xor5        r5,  Agi1_s2, Abi1_s2, Asi1_s2, Ami0_s2, Aki1_s2
+ 1062              	    xorrol      r9, r5, r6
+ 1063              	    str         r9, [r0, #mDo0_s2]
+ 1064              	    xor5        r4,  Agi0_s2, Abi0_s2, Asi0_s2, Ami1_s2, Aki0_s2
+ 1065              	    eors        r3, r3, r4
+ 1066              	    str         r3, [r0, #mDo1_s2]
+ 1067              	
+ 1068              	    xor5        r3,  Aba0_s2, Asa1_s2, Ama1_s2, Aka1_s2, Aga1_s2
+ 1069              	    xorrol      r10, r3, r4
+ 1070              	    str         r10, [r0, #mDe0_s2]
+ 1071              	    xor5        r6,  Aba1_s2, Asa0_s2, Ama0_s2, Aka0_s2, Aga0_s2
+ 1072              	    eors        r11, r6, r5
+ 1073              	    str         r11, [r0, #mDe1_s2]
+ 1074              	
+ 1075              	    xor5        r4,  Aso0_s2, Amo0_s2, Ako1_s2, Ago0_s2, Abo0_s2
+ 1076              	    xorrol      r5, lr, r4
+ 1077              	    str         r5, [r0, #mDi0_s2]
+ 1078              	    xor5        r5,  Aso1_s2, Amo1_s2, Ako0_s2, Ago1_s2, Abo1_s2
+ 1079              	    eors        r2, r7, r5
+ 1080              	    str         r2, [r0, #mDi1_s2]
+ 1081              	
+ 1082              	    xorrol      r12, r5, r6
+ 1083              	    str         r12, [r0, #mDu0_s2]
+ 1084              	    eors        lr, r4, r3
+ 1085              	    str         lr, [r0, #mDu1_s2]
+ 1086              	
+ 1087              	
+ 1088              	    @DIFFUSION SHARE 1
+ 1089              	    xor5        r3, Aku1_s1, Agu0_s1, Abu1_s1, Asu1_s1, Amu1_s1
+ 1090              	    xor5        r7, Ame0_s1, Ake0_s1, Age0_s1, Abe0_s1, Ase1_s1
+ 1091              	    xorrol      r6, r3, r7
+ 1092              	    str         r6, [r0, #mDa0_s1]
+ 1093              	    xor5        r6,  Aku0_s1, Agu1_s1, Abu0_s1, Asu0_s1, Amu0_s1
+ 1094              	    xor5        lr, Ame1_s1, Ake1_s1, Age1_s1, Abe1_s1, Ase0_s1
+ 1095              	    eors        r8, r6, lr
+ 1096              	    str         r8, [r0, #mDa1_s1]
+ 1097              	
+ 1098              	    xor5        r5,  Agi1_s1, Abi1_s1, Asi1_s1, Ami0_s1, Aki1_s1
+ 1099              	    xorrol      r9, r5, r6
+ 1100              	    str         r9, [r0, #mDo0_s1]
+ 1101              	    xor5        r4,  Agi0_s1, Abi0_s1, Asi0_s1, Ami1_s1, Aki0_s1
+ 1102              	    eors        r3, r3, r4
+ 1103              	    str         r3, [r0, #mDo1_s1]
+ 1104              	
+ 1105              	    xor5        r3,  Aba0_s1, Asa1_s1, Ama1_s1, Aka1_s1, Aga1_s1
+ 1106              	    xorrol      r10, r3, r4
+ 1107              	    str         r10, [r0, #mDe0_s1]
+ 1108              	    xor5        r6,  Aba1_s1, Asa0_s1, Ama0_s1, Aka0_s1, Aga0_s1
+ 1109              	    eors        r11, r6, r5
+ 1110              	    str         r11, [r0, #mDe1_s1]
+ 1111              	
+ 1112              	    xor5        r4,  Aso0_s1, Amo0_s1, Ako1_s1, Ago0_s1, Abo0_s1
+ 1113              	    xorrol      r5, lr, r4
+ 1114              	    str         r5, [r0, #mDi0_s1]
+ 1115              	    xor5        r5,  Aso1_s1, Amo1_s1, Ako0_s1, Ago1_s1, Abo1_s1
+ 1116              	    eors        r2, r7, r5
+ 1117              	    str         r2, [r0, #mDi1_s1]
+ 1118              	
+ 1119              	    xorrol      r12, r5, r6
+ 1120              	    str         r12, [r0, #mDu0_s1]
+ 1121              	    eors        lr, r4, r3
+ 1122              	    str         lr, [r0, #mDu1_s1]
+ 1123              	
+ 1124              	    KeccakThetaRhoPiChi r5, Ama0_s1, r8,  2, r6, Abe0_s1, r11, 23, r7, Aki0_s1, r2, 31, r3, Aso1_s1
+ 1125              	    KeccakThetaRhoPiChi r7, Aga0_s1, r8,  9, r3, Ame1_s1, r10,  0, r4, Abi0_s1, r2,  3, r5, Ako0_s1
+ 1126              	    ldr         r8, [r0, #mDa0_s1]
+ 1127              	    KeccakThetaRhoPiChi r4, Asa1_s1, r8, 18, r5, Age1_s1, r10,  5, r6, Ami1_s1, r2,  8, r7, Abo1_s1
+ 1128              	    KeccakThetaRhoPiChi r6, Aka1_s1, r8, 20, r7, Ase1_s1, r11,  1, r3, Agi0_s1, r2, 31, r4, Amo1_s1
+ 1129              	    ldr         r9, [r0, #mDo1_s1]
+ 1130              	    KeccakThetaRhoPiChiIota  Aba0_s1, r8,          Ake1_s1, r10, 22,      Asi0_s1, r2, 22,      Ago
+ 1131              	
+ 1132              	    ldr         r2, [r0, #mDi0_s1]
+ 1133              	    KeccakThetaRhoPiChi r5, Ama1_s1, r8,  1, r6, Abe1_s1, r10, 22, r7, Aki1_s1, r2, 30, r3, Aso0_s1
+ 1134              	    KeccakThetaRhoPiChi r7, Aga1_s1, r8,  9, r3, Ame0_s1, r11,  1, r4, Abi1_s1, r2,  3, r5, Ako1_s1
+ 1135              	    ldr         r8, [r0, #mDa1_s1]
+ 1136              	    KeccakThetaRhoPiChi r4, Asa0_s1, r8, 18, r5, Age0_s1, r11,  5, r6, Ami0_s1, r2,  7, r7, Abo0_s1
+ 1137              	    KeccakThetaRhoPiChi r6, Aka0_s1, r8, 21, r7, Ase0_s1, r10,  1, r3, Agi1_s1, r2, 31, r4, Amo0_s1
+ 1138              	    ldr         r9, [r0, #mDo0_s1]
+ 1139              	    KeccakThetaRhoPiChiIota  Aba1_s1, r8,          Ake0_s1, r11, 22,      Asi1_s1, r2, 21,      Ago
+ 1140              	.endm
+ 1141              	
+ 1142              	
+ 1143              	.macro KeccakRound3
+ 1144              	    @DIFFUSION SHARE 0
+ 1145              	    xor5        r3,  Amu1_s0_M2, Agu0_s0_M2, Asu1_s0_M2, Aku0_s0_M2, Abu0_s0_M2
+ 1146              	    xor5        r7, Ake0_s0_M2, Abe1_s0_M2, Ame1_s0_M2, Age0_s0_M2, Ase1_s0_M2
+ 1147              	    xorrol      r6, r3, r7
+ 1148              	    str         r6, [r0, #mDa0_s0]
+ 1149              	    xor5        r6,  Amu0_s0_M2, Agu1_s0_M2, Asu0_s0_M2, Aku1_s0_M2, Abu1_s0_M2
+ 1150              	    xor5        lr, Ake1_s0_M2, Abe0_s0_M2, Ame0_s0_M2, Age1_s0_M2, Ase0_s0_M2
+ 1151              	    eors        r8, r6, lr
+ 1152              	    str         r8, [r0, #mDa1_s0]
+ 1153              	
+ 1154              	    xor5        r5,  Asi0_s0_M2, Aki0_s0_M2, Abi1_s0_M2, Ami1_s0_M2, Agi1_s0_M2
+ 1155              	    xorrol      r9, r5, r6
+ 1156              	    str         r9, [r0, #mDo0_s0]
+ 1157              	    xor5        r4,  Asi1_s0_M2, Aki1_s0_M2, Abi0_s0_M2, Ami0_s0_M2, Agi0_s0_M2
+ 1158              	    eors        r3, r3, r4
+ 1159              	    str         r3, [r0, #mDo1_s0]
+ 1160              	
+ 1161              	    xor5        r3,  Aba0_s0_M2, Ama0_s0_M2, Aga1_s0_M2, Asa1_s0_M2, Aka0_s0_M2
+ 1162              	    xorrol      r10, r3, r4
+ 1163              	    str         r10, [r0, #mDe0_s0]
+ 1164              	    xor5        r6,  Aba1_s0_M2, Ama1_s0_M2, Aga0_s0_M2, Asa0_s0_M2, Aka1_s0_M2
+ 1165              	    eors        r11, r6, r5
+ 1166              	    str         r11, [r0, #mDe1_s0]
+ 1167              	
+ 1168              	    xor5        r4,  Ago1_s0_M2, Aso0_s0_M2, Ako0_s0_M2, Abo0_s0_M2, Amo1_s0_M2
+ 1169              	    xorrol      r5, lr, r4
+ 1170              	    str         r5, [r0, #mDi0_s0]
+ 1171              	    xor5        r5,  Ago0_s0_M2, Aso1_s0_M2, Ako1_s0_M2, Abo1_s0_M2, Amo0_s0_M2
+ 1172              	    eors        r2, r7, r5
+ 1173              	    str         r2, [r0, #mDi1_s0]
+ 1174              	
+ 1175              	    xorrol      r12, r5, r6
+ 1176              	    str         r12, [r0, #mDu0_s0]
+ 1177              	    eors        lr, r4, r3
+ 1178              	    str         lr, [r0, #mDu1_s0]
+ 1179              	
+ 1180              	
+ 1181              	
+ 1182              	    @DIFFUSION SHARE 2
+ 1183              	    xor5        r3,  Amu1_s2_M2, Agu0_s2_M2, Asu1_s2_M2, Aku0_s2_M2, Abu0_s2_M2
+ 1184              	    xor5        r7, Ake0_s2_M2, Abe1_s2_M2, Ame1_s2_M2, Age0_s2_M2, Ase1_s2_M2
+ 1185              	    xorrol      r6, r3, r7
+ 1186              	    str         r6, [r0, #mDa0_s2]
+ 1187              	    xor5        r6,  Amu0_s2_M2, Agu1_s2_M2, Asu0_s2_M2, Aku1_s2_M2, Abu1_s2_M2
+ 1188              	    xor5        lr, Ake1_s2_M2, Abe0_s2_M2, Ame0_s2_M2, Age1_s2_M2, Ase0_s2_M2
+ 1189              	    eors        r8, r6, lr
+ 1190              	    str         r8, [r0, #mDa1_s2]
+ 1191              	
+ 1192              	    xor5        r5,  Asi0_s2_M2, Aki0_s2_M2, Abi1_s2_M2, Ami1_s2_M2, Agi1_s2_M2
+ 1193              	    xorrol      r9, r5, r6
+ 1194              	    str         r9, [r0, #mDo0_s2]
+ 1195              	    xor5        r4,  Asi1_s2_M2, Aki1_s2_M2, Abi0_s2_M2, Ami0_s2_M2, Agi0_s2_M2
+ 1196              	    eors        r3, r3, r4
+ 1197              	    str         r3, [r0, #mDo1_s2]
+ 1198              	
+ 1199              	    xor5        r3,  Aba0_s2_M2, Ama0_s2_M2, Aga1_s2_M2, Asa1_s2_M2, Aka0_s2_M2
+ 1200              	    xorrol      r10, r3, r4
+ 1201              	    str         r10, [r0, #mDe0_s2]
+ 1202              	    xor5        r6,  Aba1_s2_M2, Ama1_s2_M2, Aga0_s2_M2, Asa0_s2_M2, Aka1_s2_M2
+ 1203              	    eors        r11, r6, r5
+ 1204              	    str         r11, [r0, #mDe1_s2]
+ 1205              	
+ 1206              	    xor5        r4,  Ago1_s2_M2, Aso0_s2_M2, Ako0_s2_M2, Abo0_s2_M2, Amo1_s2_M2
+ 1207              	    xorrol      r5, lr, r4
+ 1208              	    str         r5, [r0, #mDi0_s2]
+ 1209              	    xor5        r5,  Ago0_s2_M2, Aso1_s2_M2, Ako1_s2_M2, Abo1_s2_M2, Amo0_s2_M2
+ 1210              	    eors        r2, r7, r5
+ 1211              	    str         r2, [r0, #mDi1_s2]
+ 1212              	
+ 1213              	    xorrol      r12, r5, r6
+ 1214              	    str         r12, [r0, #mDu0_s2]
+ 1215              	    eors        lr, r4, r3
+ 1216              	    str         lr, [r0, #mDu1_s2]
+ 1217              	
+ 1218              	
+ 1219              	
+ 1220              	    @DIFFUSION SHARE 1
+ 1221              	    xor5        r3,  Amu1_s1_M2, Agu0_s1_M2, Asu1_s1_M2, Aku0_s1_M2, Abu0_s1_M2
+ 1222              	    xor5        r7, Ake0_s1_M2, Abe1_s1_M2, Ame1_s1_M2, Age0_s1_M2, Ase1_s1_M2
+ 1223              	    xorrol      r6, r3, r7
+ 1224              	    str         r6, [r0, #mDa0_s1]
+ 1225              	    xor5        r6,  Amu0_s1_M2, Agu1_s1_M2, Asu0_s1_M2, Aku1_s1_M2, Abu1_s1_M2
+ 1226              	    xor5        lr, Ake1_s1_M2, Abe0_s1_M2, Ame0_s1_M2, Age1_s1_M2, Ase0_s1_M2
+ 1227              	    eors        r8, r6, lr
+ 1228              	    str         r8, [r0, #mDa1_s1]
+ 1229              	
+ 1230              	    xor5        r5,  Asi0_s1_M2, Aki0_s1_M2, Abi1_s1_M2, Ami1_s1_M2, Agi1_s1_M2
+ 1231              	    xorrol      r9, r5, r6
+ 1232              	    str         r9, [r0, #mDo0_s1]
+ 1233              	    xor5        r4,  Asi1_s1_M2, Aki1_s1_M2, Abi0_s1_M2, Ami0_s1_M2, Agi0_s1_M2
+ 1234              	    eors        r3, r3, r4
+ 1235              	    str         r3, [r0, #mDo1_s1]
+ 1236              	
+ 1237              	    xor5        r3,  Aba0_s1_M2, Ama0_s1_M2, Aga1_s1_M2, Asa1_s1_M2, Aka0_s1_M2
+ 1238              	    xorrol      r10, r3, r4
+ 1239              	    str         r10, [r0, #mDe0_s1]
+ 1240              	    xor5        r6,  Aba1_s1_M2, Ama1_s1_M2, Aga0_s1_M2, Asa0_s1_M2, Aka1_s1_M2
+ 1241              	    eors        r11, r6, r5
+ 1242              	    str         r11, [r0, #mDe1_s1]
+ 1243              	
+ 1244              	    xor5        r4,  Ago1_s1_M2, Aso0_s1_M2, Ako0_s1_M2, Abo0_s1_M2, Amo1_s1_M2
+ 1245              	    xorrol      r5, lr, r4
+ 1246              	    str         r5, [r0, #mDi0_s1]
+ 1247              	    xor5        r5,  Ago0_s1_M2, Aso1_s1_M2, Ako1_s1_M2, Abo1_s1_M2, Amo0_s1_M2
+ 1248              	    eors        r2, r7, r5
+ 1249              	    str         r2, [r0, #mDi1_s1]
+ 1250              	
+ 1251              	    xorrol      r12, r5, r6
+ 1252              	    str         r12, [r0, #mDu0_s1]
+ 1253              	    eors        lr, r4, r3
+ 1254              	    str         lr, [r0, #mDu1_s1]
+ 1255              	
+ 1256              	
+ 1257              	
+ 1258              	
+ 1259              	KeccakThetaRhoPiChi r5, Aga0_s1_M2, r8,  2, r6, Age0_s1_M2, r11, 23, r7, Agi0_s1_M2, r2, 31, r3, Ag
+ 1260              	KeccakThetaRhoPiChi r7, Aka1_s1_M2, r8,  9, r3, Ake1_s1_M2, r10,  0, r4, Aki1_s1_M2, r2,  3, r5, Ak
+ 1261              	ldr         r8, [r0, #mDa0_s1]
+ 1262              	KeccakThetaRhoPiChi r4, Ama0_s1_M2, r8, 18, r5, Ame0_s1_M2, r10,  5, r6, Ami0_s1_M2, r2,  8, r7, Am
+ 1263              	KeccakThetaRhoPiChi r6, Asa1_s1_M2, r8, 20, r7, Ase1_s1_M2, r11,  1, r3, Asi1_s1_M2, r2, 31, r4, As
+ 1264              	ldr         r9, [r0, #mDo1_s1]
+ 1265              	KeccakThetaRhoPiChiIota  Aba0_s1_M2, r8,          Abe0_s1_M2, r10, 22,      Abi0_s1_M2, r2, 22,    
+ 1266              	
+ 1267              	ldr         r2, [r0, #mDi0_s1]
+ 1268              	KeccakThetaRhoPiChi r5, Aga1_s1_M2, r8,  1, r6, Age1_s1_M2, r10, 22, r7, Agi1_s1_M2, r2, 30, r3, Ag
+ 1269              	KeccakThetaRhoPiChi r7, Aka0_s1_M2, r8,  9, r3, Ake0_s1_M2, r11,  1, r4, Aki0_s1_M2, r2,  3, r5, Ak
+ 1270              	ldr         r8, [r0, #mDa1_s1]
+ 1271              	KeccakThetaRhoPiChi r4, Ama1_s1_M2, r8, 18, r5, Ame1_s1_M2, r11,  5, r6, Ami1_s1_M2, r2,  7, r7, Am
+ 1272              	KeccakThetaRhoPiChi r6, Asa0_s1_M2, r8, 21, r7, Ase0_s1_M2, r10,  1, r3, Asi0_s1_M2, r2, 31, r4, As
+ 1273              	ldr         r9, [r0, #mDo0_s1]
+ 1274              	KeccakThetaRhoPiChiIota  Aba1_s1_M2, r8,          Abe1_s1_M2, r11, 22,      Abi1_s1_M2, r2, 21,    
+ 1275              	
+ 1276              	.endm
+ 1277              	
+ 1278              	
+ 1279              	
+ 1280              	
+ 1281              	
+ 1282              	@  void KeccakF1600_StatePermute( void *state )
+ 1283              	@
+ 1284              	.align 8
+ 1285              	.global  KeccakF1600_StatePermute
+ 1287              	KeccakF1600_StatePermute:
+1288:Keccak1600NoOpt.S ****     adr     r1, KeccakP1600_Permute_RoundConstants24
+1289:Keccak1600NoOpt.S ****     b       KeccakP1600_Permute
+ 1290 0004 AFF30080 	.align 8
+ 1290      AFF30080 
+ 1290      AFF30080 
+ 1290      AFF30080 
+ 1290      AFF30080 
+ 1291              	KeccakP1600_Permute_RoundConstants24:
+ 1292              	    @       0           1
+ 1293 0100 01000000 			.long      0x00000001, 0x00000000
+ 1293      00000000 
+ 1294 0108 00000000 			.long      0x00000000, 0x00000089
+ 1294      89000000 
+ 1295 0110 00000000 			.long      0x00000000, 0x8000008b
+ 1295      8B000080 
+ 1296 0118 00000000 			.long      0x00000000, 0x80008080
+ 1296      80800080 
+ 1297 0120 01000000 			.long      0x00000001, 0x0000008b
+ 1297      8B000000 
+ 1298 0128 01000000 			.long      0x00000001, 0x00008000
+ 1298      00800000 
+ 1299 0130 01000000 			.long      0x00000001, 0x80008088
+ 1299      88800080 
+ 1300 0138 01000000 			.long      0x00000001, 0x80000082
+ 1300      82000080 
+ 1301 0140 00000000 			.long      0x00000000, 0x0000000b
+ 1301      0B000000 
+ 1302 0148 00000000 			.long      0x00000000, 0x0000000a
+ 1302      0A000000 
+ 1303 0150 01000000 			.long      0x00000001, 0x00008082
+ 1303      82800000 
+ 1304 0158 00000000 			.long      0x00000000, 0x00008003
+ 1304      03800000 
+ 1305              	KeccakP1600_Permute_RoundConstants12:
+ 1306 0160 01000000 			.long      0x00000001, 0x0000808b
+ 1306      8B800000 
+ 1307 0168 01000000 			.long      0x00000001, 0x8000000b
+ 1307      0B000080 
+ 1308 0170 01000000 			.long      0x00000001, 0x8000008a
+ 1308      8A000080 
+ 1309 0178 01000000 			.long      0x00000001, 0x80000081
+ 1309      81000080 
+ 1310 0180 00000000 			.long      0x00000000, 0x80000081
+ 1310      81000080 
+ 1311 0188 00000000 			.long      0x00000000, 0x80000008
+ 1311      08000080 
+ 1312 0190 00000000 			.long      0x00000000, 0x00000083
+ 1312      83000000 
+ 1313 0198 00000000 			.long      0x00000000, 0x80008003
+ 1313      03800080 
+ 1314              	KeccakP1600_Permute_RoundConstants0:
+ 1315 01a0 01000000 			.long      0x00000001, 0x80008088
+ 1315      88800080 
+ 1316 01a8 00000000 			.long      0x00000000, 0x80000088
+ 1316      88000080 
+ 1317 01b0 01000000 			.long      0x00000001, 0x00008000
+ 1317      00800000 
+ 1318 01b8 00000000 			.long      0x00000000, 0x80008082
+ 1318      82800080 
+ 1319              	KeccakP1600_Permute_RoundConstants0Mod4:
+ 1320 01c0 FF000000 			.long      0x000000FF  @terminator
+ 1321              	
+ 1322              	
+ 1323              	
+ 1324              	
+ 1325              	@ void KeccakP1600_Permute( void *state, void * rc )
+ 1326 01c4 AFF30080 	.align 8
+ 1326      AFF30080 
+ 1326      AFF30080 
+ 1326      AFF30080 
+ 1326      AFF30080 
+ 1327              	KeccakP1600_Permute:
+1328:Keccak1600NoOpt.S ****     push    { r4 - r12, lr }
+1329:Keccak1600NoOpt.S ****     str     r1, [r0, #mRC]
+ 1330              	KeccakP1600_Permute_RoundLoop:
+1331:Keccak1600NoOpt.S ****     KeccakRound0
+ 1332              	KeccakP1600_Permute_Round3Mod4:
+1333:Keccak1600NoOpt.S ****     KeccakRound1
+ 1334              	KeccakP1600_Permute_Round2Mod4:
+1335:Keccak1600NoOpt.S ****     KeccakRound2
+ 1336              	KeccakP1600_Permute_Round1Mod4:
+1337:Keccak1600NoOpt.S ****     KeccakRound3
+1338:Keccak1600NoOpt.S ****     bne     KeccakP1600_Permute_RoundLoop
+1339:Keccak1600NoOpt.S ****     pop     { r4 - r12, pc }...
+DEFINED SYMBOLS
+   Keccak1600NoOpt.S:7      *ABS*:0000000000000000 Aba0_s0
+   Keccak1600NoOpt.S:8      *ABS*:0000000000000004 Aba1_s0
+   Keccak1600NoOpt.S:9      *ABS*:0000000000000008 Abe0_s0
+   Keccak1600NoOpt.S:10     *ABS*:000000000000000c Abe1_s0
+   Keccak1600NoOpt.S:11     *ABS*:0000000000000010 Abi0_s0
+   Keccak1600NoOpt.S:12     *ABS*:0000000000000014 Abi1_s0
+   Keccak1600NoOpt.S:13     *ABS*:0000000000000018 Abo0_s0
+   Keccak1600NoOpt.S:14     *ABS*:000000000000001c Abo1_s0
+   Keccak1600NoOpt.S:15     *ABS*:0000000000000020 Abu0_s0
+   Keccak1600NoOpt.S:16     *ABS*:0000000000000024 Abu1_s0
+   Keccak1600NoOpt.S:17     *ABS*:0000000000000028 Aga0_s0
+   Keccak1600NoOpt.S:18     *ABS*:000000000000002c Aga1_s0
+   Keccak1600NoOpt.S:19     *ABS*:0000000000000030 Age0_s0
+   Keccak1600NoOpt.S:20     *ABS*:0000000000000034 Age1_s0
+   Keccak1600NoOpt.S:21     *ABS*:0000000000000038 Agi0_s0
+   Keccak1600NoOpt.S:22     *ABS*:000000000000003c Agi1_s0
+   Keccak1600NoOpt.S:23     *ABS*:0000000000000040 Ago0_s0
+   Keccak1600NoOpt.S:24     *ABS*:0000000000000044 Ago1_s0
+   Keccak1600NoOpt.S:25     *ABS*:0000000000000048 Agu0_s0
+   Keccak1600NoOpt.S:26     *ABS*:000000000000004c Agu1_s0
+   Keccak1600NoOpt.S:27     *ABS*:0000000000000050 Aka0_s0
+   Keccak1600NoOpt.S:28     *ABS*:0000000000000054 Aka1_s0
+   Keccak1600NoOpt.S:29     *ABS*:0000000000000058 Ake0_s0
+   Keccak1600NoOpt.S:30     *ABS*:000000000000005c Ake1_s0
+   Keccak1600NoOpt.S:31     *ABS*:0000000000000060 Aki0_s0
+   Keccak1600NoOpt.S:32     *ABS*:0000000000000064 Aki1_s0
+   Keccak1600NoOpt.S:33     *ABS*:0000000000000068 Ako0_s0
+   Keccak1600NoOpt.S:34     *ABS*:000000000000006c Ako1_s0
+   Keccak1600NoOpt.S:35     *ABS*:0000000000000070 Aku0_s0
+   Keccak1600NoOpt.S:36     *ABS*:0000000000000074 Aku1_s0
+   Keccak1600NoOpt.S:37     *ABS*:0000000000000078 Ama0_s0
+   Keccak1600NoOpt.S:38     *ABS*:000000000000007c Ama1_s0
+   Keccak1600NoOpt.S:39     *ABS*:0000000000000080 Ame0_s0
+   Keccak1600NoOpt.S:40     *ABS*:0000000000000084 Ame1_s0
+   Keccak1600NoOpt.S:41     *ABS*:0000000000000088 Ami0_s0
+   Keccak1600NoOpt.S:42     *ABS*:000000000000008c Ami1_s0
+   Keccak1600NoOpt.S:43     *ABS*:0000000000000090 Amo0_s0
+   Keccak1600NoOpt.S:44     *ABS*:0000000000000094 Amo1_s0
+   Keccak1600NoOpt.S:45     *ABS*:0000000000000098 Amu0_s0
+   Keccak1600NoOpt.S:46     *ABS*:000000000000009c Amu1_s0
+   Keccak1600NoOpt.S:47     *ABS*:00000000000000a0 Asa0_s0
+   Keccak1600NoOpt.S:48     *ABS*:00000000000000a4 Asa1_s0
+   Keccak1600NoOpt.S:49     *ABS*:00000000000000a8 Ase0_s0
+   Keccak1600NoOpt.S:50     *ABS*:00000000000000ac Ase1_s0
+   Keccak1600NoOpt.S:51     *ABS*:00000000000000b0 Asi0_s0
+   Keccak1600NoOpt.S:52     *ABS*:00000000000000b4 Asi1_s0
+   Keccak1600NoOpt.S:53     *ABS*:00000000000000b8 Aso0_s0
+   Keccak1600NoOpt.S:54     *ABS*:00000000000000bc Aso1_s0
+   Keccak1600NoOpt.S:55     *ABS*:00000000000000c0 Asu0_s0
+   Keccak1600NoOpt.S:56     *ABS*:00000000000000c4 Asu1_s0
+   Keccak1600NoOpt.S:58     *ABS*:00000000000000c8 Aba0_s1
+   Keccak1600NoOpt.S:59     *ABS*:00000000000000cc Aba1_s1
+   Keccak1600NoOpt.S:60     *ABS*:00000000000000d0 Abe0_s1
+   Keccak1600NoOpt.S:61     *ABS*:00000000000000d4 Abe1_s1
+   Keccak1600NoOpt.S:62     *ABS*:00000000000000d8 Abi0_s1
+   Keccak1600NoOpt.S:63     *ABS*:00000000000000dc Abi1_s1
+   Keccak1600NoOpt.S:64     *ABS*:00000000000000e0 Abo0_s1
+   Keccak1600NoOpt.S:65     *ABS*:00000000000000e4 Abo1_s1
+   Keccak1600NoOpt.S:66     *ABS*:00000000000000e8 Abu0_s1
+   Keccak1600NoOpt.S:67     *ABS*:00000000000000ec Abu1_s1
+   Keccak1600NoOpt.S:68     *ABS*:00000000000000f0 Aga0_s1
+   Keccak1600NoOpt.S:69     *ABS*:00000000000000f4 Aga1_s1
+   Keccak1600NoOpt.S:70     *ABS*:00000000000000f8 Age0_s1
+   Keccak1600NoOpt.S:71     *ABS*:00000000000000fc Age1_s1
+   Keccak1600NoOpt.S:72     *ABS*:0000000000000100 Agi0_s1
+   Keccak1600NoOpt.S:73     *ABS*:0000000000000104 Agi1_s1
+   Keccak1600NoOpt.S:74     *ABS*:0000000000000108 Ago0_s1
+   Keccak1600NoOpt.S:75     *ABS*:000000000000010c Ago1_s1
+   Keccak1600NoOpt.S:76     *ABS*:0000000000000110 Agu0_s1
+   Keccak1600NoOpt.S:77     *ABS*:0000000000000114 Agu1_s1
+   Keccak1600NoOpt.S:78     *ABS*:0000000000000118 Aka0_s1
+   Keccak1600NoOpt.S:79     *ABS*:000000000000011c Aka1_s1
+   Keccak1600NoOpt.S:80     *ABS*:0000000000000120 Ake0_s1
+   Keccak1600NoOpt.S:81     *ABS*:0000000000000124 Ake1_s1
+   Keccak1600NoOpt.S:82     *ABS*:0000000000000128 Aki0_s1
+   Keccak1600NoOpt.S:83     *ABS*:000000000000012c Aki1_s1
+   Keccak1600NoOpt.S:84     *ABS*:0000000000000130 Ako0_s1
+   Keccak1600NoOpt.S:85     *ABS*:0000000000000134 Ako1_s1
+   Keccak1600NoOpt.S:86     *ABS*:0000000000000138 Aku0_s1
+   Keccak1600NoOpt.S:87     *ABS*:000000000000013c Aku1_s1
+   Keccak1600NoOpt.S:88     *ABS*:0000000000000140 Ama0_s1
+   Keccak1600NoOpt.S:89     *ABS*:0000000000000144 Ama1_s1
+   Keccak1600NoOpt.S:90     *ABS*:0000000000000148 Ame0_s1
+   Keccak1600NoOpt.S:91     *ABS*:000000000000014c Ame1_s1
+   Keccak1600NoOpt.S:92     *ABS*:0000000000000150 Ami0_s1
+   Keccak1600NoOpt.S:93     *ABS*:0000000000000154 Ami1_s1
+   Keccak1600NoOpt.S:94     *ABS*:0000000000000158 Amo0_s1
+   Keccak1600NoOpt.S:95     *ABS*:000000000000015c Amo1_s1
+   Keccak1600NoOpt.S:96     *ABS*:0000000000000160 Amu0_s1
+   Keccak1600NoOpt.S:97     *ABS*:0000000000000164 Amu1_s1
+   Keccak1600NoOpt.S:98     *ABS*:0000000000000168 Asa0_s1
+   Keccak1600NoOpt.S:99     *ABS*:000000000000016c Asa1_s1
+   Keccak1600NoOpt.S:100    *ABS*:0000000000000170 Ase0_s1
+   Keccak1600NoOpt.S:101    *ABS*:0000000000000174 Ase1_s1
+   Keccak1600NoOpt.S:102    *ABS*:0000000000000178 Asi0_s1
+   Keccak1600NoOpt.S:103    *ABS*:000000000000017c Asi1_s1
+   Keccak1600NoOpt.S:104    *ABS*:0000000000000180 Aso0_s1
+   Keccak1600NoOpt.S:105    *ABS*:0000000000000184 Aso1_s1
+   Keccak1600NoOpt.S:106    *ABS*:0000000000000188 Asu0_s1
+   Keccak1600NoOpt.S:107    *ABS*:000000000000018c Asu1_s1
+   Keccak1600NoOpt.S:109    *ABS*:0000000000000190 Aba0_s2
+   Keccak1600NoOpt.S:110    *ABS*:0000000000000194 Aba1_s2
+   Keccak1600NoOpt.S:111    *ABS*:0000000000000198 Abe0_s2
+   Keccak1600NoOpt.S:112    *ABS*:000000000000019c Abe1_s2
+   Keccak1600NoOpt.S:113    *ABS*:00000000000001a0 Abi0_s2
+   Keccak1600NoOpt.S:114    *ABS*:00000000000001a4 Abi1_s2
+   Keccak1600NoOpt.S:115    *ABS*:00000000000001a8 Abo0_s2
+   Keccak1600NoOpt.S:116    *ABS*:00000000000001ac Abo1_s2
+   Keccak1600NoOpt.S:117    *ABS*:00000000000001b0 Abu0_s2
+   Keccak1600NoOpt.S:118    *ABS*:00000000000001b4 Abu1_s2
+   Keccak1600NoOpt.S:119    *ABS*:00000000000001b8 Aga0_s2
+   Keccak1600NoOpt.S:120    *ABS*:00000000000001bc Aga1_s2
+   Keccak1600NoOpt.S:121    *ABS*:00000000000001c0 Age0_s2
+   Keccak1600NoOpt.S:122    *ABS*:00000000000001c4 Age1_s2
+   Keccak1600NoOpt.S:123    *ABS*:00000000000001c8 Agi0_s2
+   Keccak1600NoOpt.S:124    *ABS*:00000000000001cc Agi1_s2
+   Keccak1600NoOpt.S:125    *ABS*:00000000000001d0 Ago0_s2
+   Keccak1600NoOpt.S:126    *ABS*:00000000000001d4 Ago1_s2
+   Keccak1600NoOpt.S:127    *ABS*:00000000000001d8 Agu0_s2
+   Keccak1600NoOpt.S:128    *ABS*:00000000000001dc Agu1_s2
+   Keccak1600NoOpt.S:129    *ABS*:00000000000001e0 Aka0_s2
+   Keccak1600NoOpt.S:130    *ABS*:00000000000001e4 Aka1_s2
+   Keccak1600NoOpt.S:131    *ABS*:00000000000001e8 Ake0_s2
+   Keccak1600NoOpt.S:132    *ABS*:00000000000001ec Ake1_s2
+   Keccak1600NoOpt.S:133    *ABS*:00000000000001f0 Aki0_s2
+   Keccak1600NoOpt.S:134    *ABS*:00000000000001f4 Aki1_s2
+   Keccak1600NoOpt.S:135    *ABS*:00000000000001f8 Ako0_s2
+   Keccak1600NoOpt.S:136    *ABS*:00000000000001fc Ako1_s2
+   Keccak1600NoOpt.S:137    *ABS*:0000000000000200 Aku0_s2
+   Keccak1600NoOpt.S:138    *ABS*:0000000000000204 Aku1_s2
+   Keccak1600NoOpt.S:139    *ABS*:0000000000000208 Ama0_s2
+   Keccak1600NoOpt.S:140    *ABS*:000000000000020c Ama1_s2
+   Keccak1600NoOpt.S:141    *ABS*:0000000000000210 Ame0_s2
+   Keccak1600NoOpt.S:142    *ABS*:0000000000000214 Ame1_s2
+   Keccak1600NoOpt.S:143    *ABS*:0000000000000218 Ami0_s2
+   Keccak1600NoOpt.S:144    *ABS*:000000000000021c Ami1_s2
+   Keccak1600NoOpt.S:145    *ABS*:0000000000000220 Amo0_s2
+   Keccak1600NoOpt.S:146    *ABS*:0000000000000224 Amo1_s2
+   Keccak1600NoOpt.S:147    *ABS*:0000000000000228 Amu0_s2
+   Keccak1600NoOpt.S:148    *ABS*:000000000000022c Amu1_s2
+   Keccak1600NoOpt.S:149    *ABS*:0000000000000230 Asa0_s2
+   Keccak1600NoOpt.S:150    *ABS*:0000000000000234 Asa1_s2
+   Keccak1600NoOpt.S:151    *ABS*:0000000000000238 Ase0_s2
+   Keccak1600NoOpt.S:152    *ABS*:000000000000023c Ase1_s2
+   Keccak1600NoOpt.S:153    *ABS*:0000000000000240 Asi0_s2
+   Keccak1600NoOpt.S:154    *ABS*:0000000000000244 Asi1_s2
+   Keccak1600NoOpt.S:155    *ABS*:0000000000000248 Aso0_s2
+   Keccak1600NoOpt.S:156    *ABS*:000000000000024c Aso1_s2
+   Keccak1600NoOpt.S:157    *ABS*:0000000000000250 Asu0_s2
+   Keccak1600NoOpt.S:158    *ABS*:0000000000000254 Asu1_s2
+   Keccak1600NoOpt.S:161    *ABS*:0000000000000258 Aba0_s0_M2
+   Keccak1600NoOpt.S:162    *ABS*:000000000000025c Aba1_s0_M2
+   Keccak1600NoOpt.S:163    *ABS*:0000000000000260 Abe0_s0_M2
+   Keccak1600NoOpt.S:164    *ABS*:0000000000000264 Abe1_s0_M2
+   Keccak1600NoOpt.S:165    *ABS*:0000000000000268 Abi0_s0_M2
+   Keccak1600NoOpt.S:166    *ABS*:000000000000026c Abi1_s0_M2
+   Keccak1600NoOpt.S:167    *ABS*:0000000000000270 Abo0_s0_M2
+   Keccak1600NoOpt.S:168    *ABS*:0000000000000274 Abo1_s0_M2
+   Keccak1600NoOpt.S:169    *ABS*:0000000000000278 Abu0_s0_M2
+   Keccak1600NoOpt.S:170    *ABS*:000000000000027c Abu1_s0_M2
+   Keccak1600NoOpt.S:171    *ABS*:0000000000000280 Aga0_s0_M2
+   Keccak1600NoOpt.S:172    *ABS*:0000000000000284 Aga1_s0_M2
+   Keccak1600NoOpt.S:173    *ABS*:0000000000000288 Age0_s0_M2
+   Keccak1600NoOpt.S:174    *ABS*:000000000000028c Age1_s0_M2
+   Keccak1600NoOpt.S:175    *ABS*:0000000000000290 Agi0_s0_M2
+   Keccak1600NoOpt.S:176    *ABS*:0000000000000294 Agi1_s0_M2
+   Keccak1600NoOpt.S:177    *ABS*:0000000000000298 Ago0_s0_M2
+   Keccak1600NoOpt.S:178    *ABS*:000000000000029c Ago1_s0_M2
+   Keccak1600NoOpt.S:179    *ABS*:00000000000002a0 Agu0_s0_M2
+   Keccak1600NoOpt.S:180    *ABS*:00000000000002a4 Agu1_s0_M2
+   Keccak1600NoOpt.S:181    *ABS*:00000000000002a8 Aka0_s0_M2
+   Keccak1600NoOpt.S:182    *ABS*:00000000000002ac Aka1_s0_M2
+   Keccak1600NoOpt.S:183    *ABS*:00000000000002b0 Ake0_s0_M2
+   Keccak1600NoOpt.S:184    *ABS*:00000000000002b4 Ake1_s0_M2
+   Keccak1600NoOpt.S:185    *ABS*:00000000000002b8 Aki0_s0_M2
+   Keccak1600NoOpt.S:186    *ABS*:00000000000002bc Aki1_s0_M2
+   Keccak1600NoOpt.S:187    *ABS*:00000000000002c0 Ako0_s0_M2
+   Keccak1600NoOpt.S:188    *ABS*:00000000000002c4 Ako1_s0_M2
+   Keccak1600NoOpt.S:189    *ABS*:00000000000002c8 Aku0_s0_M2
+   Keccak1600NoOpt.S:190    *ABS*:00000000000002cc Aku1_s0_M2
+   Keccak1600NoOpt.S:191    *ABS*:00000000000002d0 Ama0_s0_M2
+   Keccak1600NoOpt.S:192    *ABS*:00000000000002d4 Ama1_s0_M2
+   Keccak1600NoOpt.S:193    *ABS*:00000000000002d8 Ame0_s0_M2
+   Keccak1600NoOpt.S:194    *ABS*:00000000000002dc Ame1_s0_M2
+   Keccak1600NoOpt.S:195    *ABS*:00000000000002e0 Ami0_s0_M2
+   Keccak1600NoOpt.S:196    *ABS*:00000000000002e4 Ami1_s0_M2
+   Keccak1600NoOpt.S:197    *ABS*:00000000000002e8 Amo0_s0_M2
+   Keccak1600NoOpt.S:198    *ABS*:00000000000002ec Amo1_s0_M2
+   Keccak1600NoOpt.S:199    *ABS*:00000000000002f0 Amu0_s0_M2
+   Keccak1600NoOpt.S:200    *ABS*:00000000000002f4 Amu1_s0_M2
+   Keccak1600NoOpt.S:201    *ABS*:00000000000002f8 Asa0_s0_M2
+   Keccak1600NoOpt.S:202    *ABS*:00000000000002fc Asa1_s0_M2
+   Keccak1600NoOpt.S:203    *ABS*:0000000000000300 Ase0_s0_M2
+   Keccak1600NoOpt.S:204    *ABS*:0000000000000304 Ase1_s0_M2
+   Keccak1600NoOpt.S:205    *ABS*:0000000000000308 Asi0_s0_M2
+   Keccak1600NoOpt.S:206    *ABS*:000000000000030c Asi1_s0_M2
+   Keccak1600NoOpt.S:207    *ABS*:0000000000000310 Aso0_s0_M2
+   Keccak1600NoOpt.S:208    *ABS*:0000000000000314 Aso1_s0_M2
+   Keccak1600NoOpt.S:209    *ABS*:0000000000000318 Asu0_s0_M2
+   Keccak1600NoOpt.S:210    *ABS*:000000000000031c Asu1_s0_M2
+   Keccak1600NoOpt.S:213    *ABS*:0000000000000320 Aba0_s1_M2
+   Keccak1600NoOpt.S:214    *ABS*:0000000000000324 Aba1_s1_M2
+   Keccak1600NoOpt.S:215    *ABS*:0000000000000328 Abe0_s1_M2
+   Keccak1600NoOpt.S:216    *ABS*:000000000000032c Abe1_s1_M2
+   Keccak1600NoOpt.S:217    *ABS*:0000000000000330 Abi0_s1_M2
+   Keccak1600NoOpt.S:218    *ABS*:0000000000000334 Abi1_s1_M2
+   Keccak1600NoOpt.S:219    *ABS*:0000000000000338 Abo0_s1_M2
+   Keccak1600NoOpt.S:220    *ABS*:000000000000033c Abo1_s1_M2
+   Keccak1600NoOpt.S:221    *ABS*:0000000000000340 Abu0_s1_M2
+   Keccak1600NoOpt.S:222    *ABS*:0000000000000344 Abu1_s1_M2
+   Keccak1600NoOpt.S:223    *ABS*:0000000000000348 Aga0_s1_M2
+   Keccak1600NoOpt.S:224    *ABS*:000000000000034c Aga1_s1_M2
+   Keccak1600NoOpt.S:225    *ABS*:0000000000000350 Age0_s1_M2
+   Keccak1600NoOpt.S:226    *ABS*:0000000000000354 Age1_s1_M2
+   Keccak1600NoOpt.S:227    *ABS*:0000000000000358 Agi0_s1_M2
+   Keccak1600NoOpt.S:228    *ABS*:000000000000035c Agi1_s1_M2
+   Keccak1600NoOpt.S:229    *ABS*:0000000000000360 Ago0_s1_M2
+   Keccak1600NoOpt.S:230    *ABS*:0000000000000364 Ago1_s1_M2
+   Keccak1600NoOpt.S:231    *ABS*:0000000000000368 Agu0_s1_M2
+   Keccak1600NoOpt.S:232    *ABS*:000000000000036c Agu1_s1_M2
+   Keccak1600NoOpt.S:233    *ABS*:0000000000000370 Aka0_s1_M2
+   Keccak1600NoOpt.S:234    *ABS*:0000000000000374 Aka1_s1_M2
+   Keccak1600NoOpt.S:235    *ABS*:0000000000000378 Ake0_s1_M2
+   Keccak1600NoOpt.S:236    *ABS*:000000000000037c Ake1_s1_M2
+   Keccak1600NoOpt.S:237    *ABS*:0000000000000380 Aki0_s1_M2
+   Keccak1600NoOpt.S:238    *ABS*:0000000000000384 Aki1_s1_M2
+   Keccak1600NoOpt.S:239    *ABS*:0000000000000388 Ako0_s1_M2
+   Keccak1600NoOpt.S:240    *ABS*:000000000000038c Ako1_s1_M2
+   Keccak1600NoOpt.S:241    *ABS*:0000000000000390 Aku0_s1_M2
+   Keccak1600NoOpt.S:242    *ABS*:0000000000000394 Aku1_s1_M2
+   Keccak1600NoOpt.S:243    *ABS*:0000000000000398 Ama0_s1_M2
+   Keccak1600NoOpt.S:244    *ABS*:000000000000039c Ama1_s1_M2
+   Keccak1600NoOpt.S:245    *ABS*:00000000000003a0 Ame0_s1_M2
+   Keccak1600NoOpt.S:246    *ABS*:00000000000003a4 Ame1_s1_M2
+   Keccak1600NoOpt.S:247    *ABS*:00000000000003a8 Ami0_s1_M2
+   Keccak1600NoOpt.S:248    *ABS*:00000000000003ac Ami1_s1_M2
+   Keccak1600NoOpt.S:249    *ABS*:00000000000003b0 Amo0_s1_M2
+   Keccak1600NoOpt.S:250    *ABS*:00000000000003b4 Amo1_s1_M2
+   Keccak1600NoOpt.S:251    *ABS*:00000000000003b8 Amu0_s1_M2
+   Keccak1600NoOpt.S:252    *ABS*:00000000000003bc Amu1_s1_M2
+   Keccak1600NoOpt.S:253    *ABS*:00000000000003c0 Asa0_s1_M2
+   Keccak1600NoOpt.S:254    *ABS*:00000000000003c4 Asa1_s1_M2
+   Keccak1600NoOpt.S:255    *ABS*:00000000000003c8 Ase0_s1_M2
+   Keccak1600NoOpt.S:256    *ABS*:00000000000003cc Ase1_s1_M2
+   Keccak1600NoOpt.S:257    *ABS*:00000000000003d0 Asi0_s1_M2
+   Keccak1600NoOpt.S:258    *ABS*:00000000000003d4 Asi1_s1_M2
+   Keccak1600NoOpt.S:259    *ABS*:00000000000003d8 Aso0_s1_M2
+   Keccak1600NoOpt.S:260    *ABS*:00000000000003dc Aso1_s1_M2
+   Keccak1600NoOpt.S:261    *ABS*:00000000000003e0 Asu0_s1_M2
+   Keccak1600NoOpt.S:262    *ABS*:00000000000003e4 Asu1_s1_M2
+   Keccak1600NoOpt.S:265    *ABS*:00000000000003e8 Aba0_s2_M2
+   Keccak1600NoOpt.S:266    *ABS*:00000000000003ec Aba1_s2_M2
+   Keccak1600NoOpt.S:267    *ABS*:00000000000003f0 Abe0_s2_M2
+   Keccak1600NoOpt.S:268    *ABS*:00000000000003f4 Abe1_s2_M2
+   Keccak1600NoOpt.S:269    *ABS*:00000000000003f8 Abi0_s2_M2
+   Keccak1600NoOpt.S:270    *ABS*:00000000000003fc Abi1_s2_M2
+   Keccak1600NoOpt.S:271    *ABS*:0000000000000400 Abo0_s2_M2
+   Keccak1600NoOpt.S:272    *ABS*:0000000000000404 Abo1_s2_M2
+   Keccak1600NoOpt.S:273    *ABS*:0000000000000408 Abu0_s2_M2
+   Keccak1600NoOpt.S:274    *ABS*:000000000000040c Abu1_s2_M2
+   Keccak1600NoOpt.S:275    *ABS*:0000000000000410 Aga0_s2_M2
+   Keccak1600NoOpt.S:276    *ABS*:0000000000000414 Aga1_s2_M2
+   Keccak1600NoOpt.S:277    *ABS*:0000000000000418 Age0_s2_M2
+   Keccak1600NoOpt.S:278    *ABS*:000000000000041c Age1_s2_M2
+   Keccak1600NoOpt.S:279    *ABS*:0000000000000420 Agi0_s2_M2
+   Keccak1600NoOpt.S:280    *ABS*:0000000000000424 Agi1_s2_M2
+   Keccak1600NoOpt.S:281    *ABS*:0000000000000428 Ago0_s2_M2
+   Keccak1600NoOpt.S:282    *ABS*:000000000000042c Ago1_s2_M2
+   Keccak1600NoOpt.S:283    *ABS*:0000000000000430 Agu0_s2_M2
+   Keccak1600NoOpt.S:284    *ABS*:0000000000000434 Agu1_s2_M2
+   Keccak1600NoOpt.S:285    *ABS*:0000000000000438 Aka0_s2_M2
+   Keccak1600NoOpt.S:286    *ABS*:000000000000043c Aka1_s2_M2
+   Keccak1600NoOpt.S:287    *ABS*:0000000000000440 Ake0_s2_M2
+   Keccak1600NoOpt.S:288    *ABS*:0000000000000444 Ake1_s2_M2
+   Keccak1600NoOpt.S:289    *ABS*:0000000000000448 Aki0_s2_M2
+   Keccak1600NoOpt.S:290    *ABS*:000000000000044c Aki1_s2_M2
+   Keccak1600NoOpt.S:291    *ABS*:0000000000000450 Ako0_s2_M2
+   Keccak1600NoOpt.S:292    *ABS*:0000000000000454 Ako1_s2_M2
+   Keccak1600NoOpt.S:293    *ABS*:0000000000000458 Aku0_s2_M2
+   Keccak1600NoOpt.S:294    *ABS*:000000000000045c Aku1_s2_M2
+   Keccak1600NoOpt.S:295    *ABS*:0000000000000460 Ama0_s2_M2
+   Keccak1600NoOpt.S:296    *ABS*:0000000000000464 Ama1_s2_M2
+   Keccak1600NoOpt.S:297    *ABS*:0000000000000468 Ame0_s2_M2
+   Keccak1600NoOpt.S:298    *ABS*:000000000000046c Ame1_s2_M2
+   Keccak1600NoOpt.S:299    *ABS*:0000000000000470 Ami0_s2_M2
+   Keccak1600NoOpt.S:300    *ABS*:0000000000000474 Ami1_s2_M2
+   Keccak1600NoOpt.S:301    *ABS*:0000000000000478 Amo0_s2_M2
+   Keccak1600NoOpt.S:302    *ABS*:000000000000047c Amo1_s2_M2
+   Keccak1600NoOpt.S:303    *ABS*:0000000000000480 Amu0_s2_M2
+   Keccak1600NoOpt.S:304    *ABS*:0000000000000484 Amu1_s2_M2
+   Keccak1600NoOpt.S:305    *ABS*:0000000000000488 Asa0_s2_M2
+   Keccak1600NoOpt.S:306    *ABS*:000000000000048c Asa1_s2_M2
+   Keccak1600NoOpt.S:307    *ABS*:0000000000000490 Ase0_s2_M2
+   Keccak1600NoOpt.S:308    *ABS*:0000000000000494 Ase1_s2_M2
+   Keccak1600NoOpt.S:309    *ABS*:0000000000000498 Asi0_s2_M2
+   Keccak1600NoOpt.S:310    *ABS*:000000000000049c Asi1_s2_M2
+   Keccak1600NoOpt.S:311    *ABS*:00000000000004a0 Aso0_s2_M2
+   Keccak1600NoOpt.S:312    *ABS*:00000000000004a4 Aso1_s2_M2
+   Keccak1600NoOpt.S:313    *ABS*:00000000000004a8 Asu0_s2_M2
+   Keccak1600NoOpt.S:314    *ABS*:00000000000004ac Asu1_s2_M2
+   Keccak1600NoOpt.S:319    *ABS*:00000000000004b0 mDa0_s0
+   Keccak1600NoOpt.S:320    *ABS*:00000000000004b4 mDa1_s0
+   Keccak1600NoOpt.S:321    *ABS*:00000000000004b8 mDe0_s0
+   Keccak1600NoOpt.S:322    *ABS*:00000000000004bc mDe1_s0
+   Keccak1600NoOpt.S:323    *ABS*:00000000000004c0 mDi0_s0
+   Keccak1600NoOpt.S:324    *ABS*:00000000000004c4 mDi1_s0
+   Keccak1600NoOpt.S:325    *ABS*:00000000000004c8 mDo0_s0
+   Keccak1600NoOpt.S:326    *ABS*:00000000000004cc mDo1_s0
+   Keccak1600NoOpt.S:327    *ABS*:00000000000004d0 mDu0_s0
+   Keccak1600NoOpt.S:328    *ABS*:00000000000004d4 mDu1_s0
+   Keccak1600NoOpt.S:330    *ABS*:00000000000004d8 mDa0_s1
+   Keccak1600NoOpt.S:331    *ABS*:00000000000004dc mDa1_s1
+   Keccak1600NoOpt.S:332    *ABS*:00000000000004e0 mDe0_s1
+   Keccak1600NoOpt.S:333    *ABS*:00000000000004e4 mDe1_s1
+   Keccak1600NoOpt.S:334    *ABS*:00000000000004e8 mDi0_s1
+   Keccak1600NoOpt.S:335    *ABS*:00000000000004ec mDi1_s1
+   Keccak1600NoOpt.S:336    *ABS*:00000000000004f0 mDo0_s1
+   Keccak1600NoOpt.S:337    *ABS*:00000000000004f4 mDo1_s1
+   Keccak1600NoOpt.S:338    *ABS*:00000000000004f8 mDu0_s1
+   Keccak1600NoOpt.S:339    *ABS*:00000000000004fc mDu1_s1
+   Keccak1600NoOpt.S:341    *ABS*:0000000000000500 mDa0_s2
+   Keccak1600NoOpt.S:342    *ABS*:0000000000000504 mDa1_s2
+   Keccak1600NoOpt.S:343    *ABS*:0000000000000508 mDe0_s2
+   Keccak1600NoOpt.S:344    *ABS*:000000000000050c mDe1_s2
+   Keccak1600NoOpt.S:345    *ABS*:0000000000000510 mDi0_s2
+   Keccak1600NoOpt.S:346    *ABS*:0000000000000514 mDi1_s2
+   Keccak1600NoOpt.S:347    *ABS*:0000000000000518 mDo0_s2
+   Keccak1600NoOpt.S:348    *ABS*:000000000000051c mDo1_s2
+   Keccak1600NoOpt.S:349    *ABS*:0000000000000520 mDu0_s2
+   Keccak1600NoOpt.S:350    *ABS*:0000000000000524 mDu1_s2
+   Keccak1600NoOpt.S:352    *ABS*:0000000000000528 mRC
+   Keccak1600NoOpt.S:353    *ABS*:000000000000052c mSize
+   Keccak1600NoOpt.S:1284   .text:0000000000000000 $t
+   Keccak1600NoOpt.S:1287   .text:0000000000000000 KeccakF1600_StatePermute
+   Keccak1600NoOpt.S:1291   .text:0000000000000100 KeccakP1600_Permute_RoundConstants24
+   Keccak1600NoOpt.S:1327   .text:0000000000000200 KeccakP1600_Permute
+   Keccak1600NoOpt.S:1293   .text:0000000000000100 $d
+   Keccak1600NoOpt.S:1305   .text:0000000000000160 KeccakP1600_Permute_RoundConstants12
+   Keccak1600NoOpt.S:1314   .text:00000000000001a0 KeccakP1600_Permute_RoundConstants0
+   Keccak1600NoOpt.S:1319   .text:00000000000001c0 KeccakP1600_Permute_RoundConstants0Mod4
+   Keccak1600NoOpt.S:1326   .text:00000000000001c4 $t
+   Keccak1600NoOpt.S:1330   .text:0000000000000208 KeccakP1600_Permute_RoundLoop
+   Keccak1600NoOpt.S:1332   .text:0000000000001ffa KeccakP1600_Permute_Round3Mod4
+   Keccak1600NoOpt.S:1334   .text:0000000000003e26 KeccakP1600_Permute_Round2Mod4
+   Keccak1600NoOpt.S:1336   .text:0000000000005c1e KeccakP1600_Permute_Round1Mod4
+
+NO UNDEFINED SYMBOLS
