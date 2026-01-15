@@ -18,7 +18,6 @@
     - **CW_Capture.ipynb**: ChipWhisperer client for capturing and storing traces.
     - **TVLA.ipynb**: Processes traces captured with `CW_Capture.ipynb` for TVLA analysis.
  
-- **toydataset_folder**: this folder contains a toy dataset of 1000 traces, where each .h5 file contains 10 traces. 
 
 ## INSTALLATION
 1. Install **ChipWhisperer 6.0.0** following the instructions at [https://chipwhisperer.readthedocs.io/en/latest/installation.html](https://chipwhisperer.readthedocs.io/en/latest/installation.html).
