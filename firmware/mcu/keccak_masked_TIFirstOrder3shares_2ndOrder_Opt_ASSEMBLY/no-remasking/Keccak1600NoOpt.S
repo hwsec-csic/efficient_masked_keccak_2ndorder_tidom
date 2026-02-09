@@ -4,6 +4,20 @@
 .thumb_func
 
 
+@----------------------------------------------------------------------------------
+@----------------------------------SYMBOLIC VARIABLES------------------------------
+@----------------------------------------------------------------------------------
+@Definition of symbolic variables associated with the memory regions of the three Keccak state shares.
+@Lane naming convention: A<x><y><m>_s<n>
+@  <x> = row (b=0, g=1, k=2, m=3, s=4)
+@  <y> = column (a=0, e=1, i=2, o=3, u=4)
+@  <m> = lane half (0=low/even, 1=high/odd)
+@  <n> = share index (0,1,2)
+
+@----------------------------------------------------------------------------------
+@Memory zone A (read in even rounds, written in odd rounds)
+@----------------------------------------------------------------------------------
+
 .equ Aba0_s0   , 0*4
 .equ Aba1_s0   , 1*4
 .equ Abe0_s0   , 2*4
@@ -156,6 +170,10 @@
 .equ Aso1_s2   , 47*4+400
 .equ Asu0_s2   , 48*4+400
 .equ Asu1_s2   , 49*4+400
+
+@----------------------------------------------------------------------------------
+@Memory zone B (written in even rounds, read in odd rounds)
+@----------------------------------------------------------------------------------
 
 
 .equ Aba0_s0_M2   , 0*4+600
@@ -313,9 +331,9 @@
 .equ Asu0_s2_M2   , 48*4+1000
 .equ Asu1_s2_M2   , 49*4+1000
 
-
-
-@   --- offsets on stack
+@-----------------------------------------------------------------------------------------------------------
+@Definition of symbolic variables associated with the memory regions of diffusions for each column and share
+@-----------------------------------------------------------------------------------------------------------
 .equ mDa0_s0   , 0*4+1200
 .equ mDa1_s0   , 1*4+1200
 .equ mDe0_s0   , 2*4+1200
@@ -349,8 +367,32 @@
 .equ mDu0_s2   , 28*4+1200
 .equ mDu1_s2   , 29*4+1200
 
+
+@----------------------------------------------------------------------------------
+@Definition of symbolic variable associated with round counter
+@----------------------------------------------------------------------------------
 .equ mRC    , 30*4+1200
-.equ mSize  , 31*4+1200
+
+
+
+@----------------------------------------------------------------------------------
+@-----------------------------------------XOR5 MACRO-------------------------------
+@----------------------------------------------------------------------------------
+@Used in theta step (at the beginning of each macro KeccakRound0, KeccakRound1, 
+@KeccakRound2, KeccakRound3) to compute the parities C(x) of each column (considering
+@a particular half and share). 
+@
+@It receives as inputs:
+@   -i1, i2, i3, i4, i5: memory addresses where 32-bit lanes from the same column, half, and share
+@                        are stored in the INPUT SPACE
+@   -res: register where the parity value will be stored 
+@
+@This macro XORs all i1, i2, i3, i4, i5 inputs and stores the result in the "res" register
+@
+@Equivalent operation: res <-- i1 XOR i2 XOR i3 XOR i4 XOR i5
+@
+@Intermediate registers: r1, r2, r12
+@----------------------------------------------------------------------------------
 
 
 .macro    xor5      res, i1, i2, i3, i4, i5
@@ -365,9 +407,48 @@
     eors        \res, \res, r1
 .endm
 
+@----------------------------------------------------------------------------------
+@----------------------------------------XORROL MACRO------------------------------
+@----------------------------------------------------------------------------------
+@Used in theta step (at the beginning of each macro KeccakRound0, KeccakRound1, 
+@KeccakRound2, KeccakRound3) to compute the diffusions D(x) of low halfs of the lanes
+@in the OUTPUT space.
+@
+@It receives as inputs:
+@   -aa, bb: registers containing the 32-bit half-lanes that will be XORed
+@   -res: register where the resulting 
+@ 
+@This macro XORs the input "aa" with the input "bb" rotated left by 1 bit,
+@and stores it in the "res" register.
+@
+@Equivalent operation: res <-- aa XOR ROTL(bb, 1)
+@
+@Intermediate registers: None
+@----------------------------------------------------------------------------------
+
 .macro    xorrol      res, aa, bb
     eor         \res, \aa, \bb, ROR #31
 .endm
+
+@----------------------------------------------------------------------------------
+@----------------------------------------OPCHI MACRO-------------------------------
+@----------------------------------------------------------------------------------
+@Used in the macros KeccakThetaRhoPiChi and KeccakThetaRhoPiChiIota to
+@compute the masked Chi function for one given share.
+@
+@For a given row, it computes the share j of the lane i (Y^i_j) at the output of the 
+@Chi step using the 32-bit half-lanes i, i+1, i+2 of the shares j+1, j+2 (X_{j+1}, X_{j+2})
+@
+@It receives as inputs:
+@   -Ia0, Ia1, Ia2: registers containing the 32-bit half-lanes i, i+1, i+2 of the share j+1 (GROUP A)
+@   -Ib0, Ib1, Ib2: registers containing the 32-bit half-lanes i, i+1, i+2 of the share j+1 (GROUP B)
+@   -memW: memory address where the resulting Y^i_j will be stored
+@
+@Equivalent operation: Y^i_j <-- f(X_{j+1}, X_{j+2}) = 
+@ =X^{i+2}_{j+1} XOR (X^{i+1}_{j+1} & X^{i+2}_{j+1}) XOR (X^{i+1}_{j+1} & X^{i+2}_{j+2}) XOR (X^{i+2}_{j+1} & X^{i+1}_{j+2}) XOR X^{i}_{j+2}
+@
+@Intermediate registers: r1, r2
+@----------------------------------------------------------------------------------
 
 .macro    OpChi      memW, Ib0, Ib1, Ib2, Ia0, Ia1, Ia2
     eors r1, \Ib0, \Ia2
@@ -381,24 +462,41 @@
 .endm
 
 
-
+@----------------------------------------------------------------------------------
+@----------------------------------KECCAKTHETARHOPICHI MACRO-----------------------
+@----------------------------------------------------------------------------------
+@Used in the macros KeccakRound0, KeccakRound1, KeccakRound2, KeccakRound3 to compute
+@the steps Theta, Rho, Pi Chi.
+@
+@It receives as inputs:
+@   -reg_Aya, reg_Aye, reg_Ayi, reg_Ayo, reg_Ayu: given the diagonal defined for in-place processing, registers where the half-lanes of a given column (a,e,i,o,u) will be stored. SHARE J+1 (GROUP A) 
+@   -reg_AyaB, reg_AyeB, reg_AyiB, reg_AyoB, reg_AyuB: given the diagonal defined for in-place processing, registers where the half-lanes of a given column (a,e,i,o,u) will be stored. SHARE J+2 (GROUP B) 
+@   -memAya, memAye, memAyi, memAyo, memAyu: given the diagonal defined for in-place processing, memory addresses where the half-lanes of a given column (a,e,i,o,u) are stored. SHARE J+1 (GROUP A). Accessing memory addresses of share j+2 (Group B) using offsets. 
+@   -Dya, Dye, Dyi, Dyo, Dyu: registers where the diffusion values for each half-lane OF THE SHARE 1 are currently stored
+@   -memDya, memDye, memDyi, memDyo, memDyu: memory addresses where the diffusion values for each half-lane OF THE SHARE 1 are stored. Memory addresses of shares 0 and 2 computed using offsets. 
+@   -rotAya, rotAye, rotAyi, rotAyo, rotAyu: rotation values for each half-lane according to rho step. 
+@
+@Although the group A and group B of registers contains always {r3-r7} and {r8-r12}, respectively, the association with columns a, b, e, i, o, u varies in each of the four cyclic rounds in order to implement in-place processing in a efficient way
+@----------------------------------------------------------------------------------
 .macro    KeccakThetaRhoPiChi reg_Aya, memAya, Dya, rotAya, reg_Aye, memAye, Dye, rotAye, reg_Ayi, memAyi, Dyi, rotAyi, reg_Ayo, memAyo, Dyo, rotAyo, reg_Ayu, memAyu, Dyu, rotAyu, reg_AyaB, reg_AyeB, reg_AyiB, reg_AyoB, reg_AyuB, memDya, memDye, memDyi, memDyo, memDyu
-    @THETA+RHO APPLIED TO S1
+    @-----THETA+RHO APPLIED TO S1-------
     push {r2, r8, r9, r10, r11, r12, lr}
 
+    @Loading the half-lanes of share 1 into the group A registers
     ldr     \reg_Aya, [r0, #\memAya]
     ldr     \reg_Aye, [r0, #\memAye]
     ldr     \reg_Ayi, [r0, #\memAyi]
     ldr     \reg_Ayo, [r0, #\memAyo]
     ldr     \reg_Ayu, [r0, #\memAyu]
 
-
+    @ Applying diffusion values to the lanes of share 1
     eors    \reg_Aya, \reg_Aya, \Dya
     eors    \reg_Aye, \reg_Aye, \Dye
     eors    \reg_Ayi, \reg_Ayi, \Dyi
     eors    \reg_Ayo, \reg_Ayo, \Dyo
     eors    \reg_Ayu, \reg_Ayu, \Dyu
 
+    @ Applying rotations of the Rho step to the half-lanes of share 1
     rors    \reg_Aya, #32-\rotAya
     .if  \rotAye > 0
         rors    \reg_Aye, #32-\rotAye
@@ -407,7 +505,7 @@
     rors    \reg_Ayo, #32-\rotAyo
     rors    \reg_Ayu, #32-\rotAyu
 
-
+    @ Storing half-lanes of the share 1 after applying Theta+Rho
     str \reg_Aya, [r0, #\memAya]
     str \reg_Aye, [r0, #\memAye]
     str \reg_Ayi, [r0, #\memAyi]
@@ -417,7 +515,10 @@
 
 
     @THETA+RHO APPLIED TO S2 
-    
+    @Loading the half-lanes of share 2 into the group B registers 
+    @Loading the diffusion values for the half-lanes of share 2 into the auxiliar registers r1, r2, lr
+    @Applying diffusion values to the half lanes of share 2
+
     ldr     \reg_AyaB, [r0, #\memAya+200]
     ldr     r1, [r0, #\memDya+40]
     ldr     \reg_AyeB, [r0, #\memAye+200]
@@ -428,7 +529,7 @@
     eors    \reg_AyaB, \reg_AyaB, r1
     eors    \reg_AyeB, \reg_AyeB, r2
     eors    \reg_AyiB, \reg_AyiB, lr
-
+ 
     ldr     \reg_AyoB, [r0, #\memAyo+200]
     ldr     r1, [r0, #\memDyo+40]
     ldr     \reg_AyuB, [r0, #\memAyu+200]
@@ -438,7 +539,7 @@
     eors    \reg_AyuB, \reg_AyuB, lr   
     
 
-
+    @ Applying rotations of the Rho step to the half-lanes of share 2
     rors    \reg_AyaB, #32-\rotAya
     .if  \rotAye > 0
         rors    \reg_AyeB, #32-\rotAye
@@ -449,9 +550,17 @@
 
 
 
-    @PI+CHI APPLIED TO SHARE 0 (SHARES 1 - 2)
+    @PI+CHI APPLIED TO SHARE 0 (SHARES 1 - 2). 
+    @At this point, the register values are:
+    @   - r3-r7: half-lanes of the share 1 with Theta and Rho steps applied (Group A)
+    @   - r8-r12: half-lanes of the share 2 with Theta and Rho steps applied (Group B)
+
+    @The following expansions of OpChi macro computes the output share Y_0 from input shares
+    @X_1, X_2 and write them in the corresponding memory address according to in-place processing
+    @(it will be one of the other positions in the diagonal, but not the same)
     
     push {r1, r2}
+    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read from memory zone B and we write in the corresponding memory zone A
     .if     \memAya < 599
         OpChi   #\memAya+400, r8, r9, r10, r3, r4, r5
         OpChi   #\memAye+400, r9, r10, r11, r4, r5, r6
@@ -469,7 +578,11 @@
 
 
 
-    @THETA+RHO APPLIED TO S0. Stack at this point (old --> new): r8-r12: Diffusions, r3-r7: SHARE 1; r8-r12: SHARE 2.
+    @THETA+RHO APPLIED TO S0
+
+    @Loading the half-lanes of share 0 into the group A of registers 
+    @Loading the diffusion values for the half-lanes of share 2 into the auxiliar registers r1, r2, lr
+    @Applying diffusion values to the half lanes of share 2
 
     ldr     \reg_Aya, [r0, #\memAya-200]
     ldr     r1, [r0, #\memDya-40]
@@ -491,6 +604,7 @@
     eors    \reg_Ayo, \reg_Ayo, r1
     eors    \reg_Ayu, \reg_Ayu, lr
     
+    @ Applying rotations of the Rho step to the half-lanes of share 2
 
     rors    \reg_Aya, #32-\rotAya
     .if  \rotAye > 0
@@ -503,7 +617,15 @@
 
 
     @PI+CHI APPLIED TO SHARE 1 (SHARES 2 - 0)
+    @At this point, the register values are:
+    @   - r3-r7: half-lanes of the share 0 with Theta and Rho steps applied (Group A)
+    @   - r8-r12: half-lanes of the share 2 with Theta and Rho steps applied (Group B)
+    @The following expansions of OpChi macro computes the output share Y_1 from input shares
+    @X_2, X_0 and write them in the corresponding memory address according to in-place processing
+    @(it will be one of the other positions in the diagonal, but not the same)
+
     push {r1, r2}
+    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read from memory zone B and we write in the corresponding memory zone A
     .if     \memAya < 599
         OpChi   #\memAya+600, r3, r4, r5, r8, r9, r10
         OpChi   #\memAye+600, r4, r5, r6, r9, r10, r11
@@ -522,6 +644,7 @@
 
     @PI+CHI APPLIED TO SHARE 2 (SHARES 0 - 1). Stack at this point (old --> new): r8-r12: Diffusions, r3-r7: SHARE 1. r3-r7 storing SHARE 0
     
+    @Loading the half-lanes of share 1 (Theta+Rho already applied) into the group B of registers 
 
     ldr     \reg_AyaB, [r0, #\memAya]             
     ldr     \reg_AyeB, [r0, #\memAye]         
@@ -529,7 +652,16 @@
     ldr     \reg_AyoB, [r0, #\memAyo]           
     ldr     \reg_AyuB, [r0, #\memAyu]           
 
+
+    @At this point, the register values are:
+    @   - r3-r7: half-lanes of the share 0 with Theta and Rho steps applied (Group A)
+    @   - r8-r12: half-lanes of the share 1 with Theta and Rho steps applied (Group B)
+    @The following expansions of OpChi macro computes the output share Y_2 from input shares
+    @X_0, X_1 and write them in the corresponding memory address according to in-place processing
+    @(it will be one of the other positions in the diagonal, but not the same)
+
     push {r1, r2}
+    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read from memory zone B and we write in the corresponding memory zone A
     .if     \memAya < 599
         OpChi   #\memAya+800, r8, r9, r10, r3, r4, r5
         OpChi   #\memAye+800, r9, r10, r11, r4, r5, r6
@@ -550,27 +682,44 @@
 .endm
 
 
+@----------------------------------------------------------------------------------
+@--------------------------------KECCAKTHETARHOPICHIIOTA MACRO---------------------
+@----------------------------------------------------------------------------------
+@Used in the macros KeccakRound0, KeccakRound1, KeccakRound2, KeccakRound3 to compute
+@the steps Theta, Rho, Pi, Chi, and apply the Round Constant of Iota step to lane Aba (0,0)
+@
+@It receives as inputs:
+@   -memAya, memAye, memAyi, memAyo, memAyu: given the diagonal defined for in-place processing, memory addresses where the half-lanes of a given column (a,e,i,o,u) are stored. SHARE J+1 (GROUP A). Accessing memory addresses of share j+2 (Group B) using offsets. 
+@   -Dya, Dye, Dyi, Dyo, Dyu: registers where the diffusion values for each half-lane OF THE SHARE 1 are currently stored
+@   -rotAya, rotAye, rotAyi, rotAyo, rotAyu: rotation values for each half-lane according to rho step. 
+@   -memDya, memDye, memDyi, memDyo, memDyu: memory addresses where the diffusion values for each half-lane OF THE SHARE 1 are stored. Memory addresses of shares 0 and 2 computed using offsets. 
+@   -offset: offset applied to access to the round constant of Iota step
+@   -last: flag to indicate if this is the last Iota applied in the fourth cyclic round
+@Registers where lanes will be stores are fixed, due to the fact that this macro processes always the
+@same diagonal (Aba, Age, Aki, Amo, Asu) --> Registers {r3-r7} and {r8-r12} of groups A and B, respectively, don't change.
 
-
+@----------------------------------------------------------------------------------
 
 .macro    KeccakThetaRhoPiChiIota  memAya, Dya, memAye, Dye, rotAye, memAyi, Dyi, rotAyi, memAyo, Dyo, rotAyo, memAyu, Dyu, rotAyu, offset, last, memDya, memDye, memDyi, memDyo, memDyu
     
     @THETA+RHO APPLIED TO S1
     push {r2, r8, r9, r10, r11, r12, lr}
 
+    @Loading the half-lanes of share 1 into the group A registers
     ldr     r3, [r0, #\memAya]
     ldr     r4, [r0, #\memAye]
     ldr     r5, [r0, #\memAyi]
     ldr     r6, [r0, #\memAyo]
     ldr     r7, [r0, #\memAyu]
 
-
+    @ Applying diffusion values to the lanes of share 1
     eors    r3, r3, \Dya
     eors    r4, r4, \Dye
     eors    r5, r5, \Dyi
     eors    r6, r6, \Dyo
     eors    r7, r7, \Dyu
 
+    @ Applying rotations of the Rho step to the half-lanes of share 1
     .if  \rotAye > 0
         rors    r4, #32-\rotAye
     .endif
@@ -578,7 +727,7 @@
     rors    r6, #32-\rotAyo
     rors    r7, #32-\rotAyu
 
-
+    @ Storing half-lanes of the share 1 after applying Theta+Rho
     str r3, [r0, #\memAya]
     str r4, [r0, #\memAye]
     str r5, [r0, #\memAyi]
@@ -588,7 +737,9 @@
 
 
     @THETA+RHO APPLIED TO S2 
-    
+    @Loading the half-lanes of share 2 into the group B registers 
+    @Loading the diffusion values for the half-lanes of share 2 into the auxiliar registers r1, r2, lr
+    @Applying diffusion values to the half lanes of share 2  
     ldr     r8, [r0, #\memAya+200]
     ldr     r1, [r0, #\memDya+40]
     ldr     r9, [r0, #\memAye+200]
@@ -607,7 +758,8 @@
     
     eors    r11, r11, r1
     eors    r12, r12, lr
-    
+
+    @ Applying rotations of the Rho step to the half-lanes of share 2 
     .if  \rotAye > 0
         rors    r9, #32-\rotAye
     .endif
@@ -620,7 +772,16 @@
 
     @PI+CHI APPLIED TO SHARE 0 (SHARES 1 - 2)
 
+    @At this point, the register values are:
+    @   - r3-r7: half-lanes of the share 1 with Theta and Rho steps applied (Group A)
+    @   - r8-r12: half-lanes of the share 2 with Theta and Rho steps applied (Group B)
+
+    @The following expansions of OpChi macro computes the output share Y_0 from input shares
+    @X_1, X_2 and write them in the corresponding memory address according to in-place processing
+    @(it will be one of the other positions in the diagonal, but not the same)
+
     push {r1, r2}
+    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read from memory zone B and we write in the corresponding memory zone A
     .if     \memAya < 599
         OpChi   #\memAya+400, r8, r9, r10, r3, r4, r5
         OpChi   #\memAye+400, r9, r10, r11, r4, r5, r6
@@ -640,6 +801,10 @@
 
 
     @THETA+RHO APPLIED TO S0. Stack at this point (old --> new): r8-r12: Diffusions, r3-r7: SHARE 1; r8-r12: SHARE 2.
+
+    @Loading the half-lanes of share 0 into the group A of registers 
+    @Loading the diffusion values for the half-lanes of share 2 into the auxiliar registers r1, r2, lr
+    @Applying diffusion values to the half lanes of share 2
 
     ldr     r3, [r0, #\memAya-200]
     ldr     r1, [r0, #\memDya-40]
@@ -661,6 +826,9 @@
     eors    r6, r6, r1
     eors    r7, r7, lr
 
+
+    @ Applying rotations of the Rho step to the half-lanes of share 2
+
     .if  \rotAye > 0
         rors    r4, #32-\rotAye
     .endif
@@ -672,8 +840,15 @@
 
 
     @PI+CHI APPLIED TO SHARE 1 (SHARES 2 - 0)
+    @At this point, the register values are:
+    @   - r3-r7: half-lanes of the share 0 with Theta and Rho steps applied (Group A)
+    @   - r8-r12: half-lanes of the share 2 with Theta and Rho steps applied (Group B)
+    @The following expansions of OpChi macro computes the output share Y_1 from input shares
+    @X_2, X_0 and write them in the corresponding memory address according to in-place processing
+    @(it will be one of the other positions in the diagonal, but not the same)
 
     push {r1, r2}
+    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read from memory zone B and we write in the corresponding memory zone A
     .if     \memAya < 599
         OpChi   #\memAya+600, r3, r4, r5, r8, r9, r10
         OpChi   #\memAye+600, r4, r5, r6, r9, r10, r11
@@ -692,7 +867,7 @@
 
 
     @PI+CHI APPLIED TO SHARE 2 (SHARES 0 - 1). Stack at this point (old --> new): r8-r12: Diffusions, r3-r7: SHARE 1. r3-r7 storing SHARE 0
-    
+    @Loading the half-lanes of share 1 (Theta+Rho already applied) into the group B of registers    
     ldr     r8, [r0, #\memAya]
     ldr     r9, [r0, #\memAye]
     ldr     r10, [r0, #\memAyi]
@@ -700,6 +875,7 @@
     ldr     r12, [r0, #\memAyu]
 
     push {r1, r2}
+    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read from memory zone B and we write in the corresponding memory zone A
     .if     \memAya < 599
         OpChi   #\memAya+800, r8, r9, r10, r3, r4, r5
         OpChi   #\memAye+800, r9, r10, r11, r4, r5, r6
@@ -715,28 +891,36 @@
     .endif
     pop {r1, r2}
 
+    @Loading the address where the Round Constants table starts
     ldr     r1, [r0, #mRC]
  
-    @INICIO NUEVO IOTA
+    @IOTA STEP
+
+    @Loading the lane Aba (0,0) into the register r2 (theta+rho+pi+chi steps applied). Read from writing memory zone
     .if     \memAya <599
         ldr     r2, [r0, #\memAya+800]
     .else
         ldr     r2, [r0, #\memAya-400]
     .endif
+
+    @Loading the Round Constant of Iota step applying the input offset to the memory address where the Round Constants table is stored
     ldr r4, [r1, #\offset]
+
+    @Lane(0,0) XOR RoundConstant 
     eors r2, r2, r4
+
+    @Writing-back the lane (0,0) after applying Iota step in the writing memory zone
     .if     \memAya <599
         str     r2, [r0, #\memAya+800]
     .else
         str     r2, [r0, #\memAya-400]
     .endif
-    @FIN NUEVO IOTA
 
 
     .if  \last == 1
-    ldr     r4, [r1, #32]!
-    str     r1, [r0, #mRC]
-    cmp     r4, #0xFF
+        ldr     r4, [r1, #32]!
+        str     r1, [r0, #mRC]
+        cmp     r4, #0xFF
     .endif
 
 
@@ -744,6 +928,12 @@
     pop {r2, r8, r9, r10, r11, r12, lr}
 .endm
 
+
+@----------------------------------------------------------------------------------
+@------------------------------------KECCAKROUND0 MACRO----------------------------
+@----------------------------------------------------------------------------------
+@This macro performs the first cyclic round of Keccak
+@----------------------------------------------------------------------------------
 
 
 .macro    KeccakRound0
@@ -876,7 +1066,13 @@
     KeccakThetaRhoPiChiIota  Aba1_s1, r8,          Age1_s1, r11, 22,      Aki0_s1, r2, 21,      Amo0_s1, r9, 10,      Asu1_s1, lr,  7, 4, 0, mDa1_s1, mDe1_s1, mDi0_s1, mDo0_s1, mDu1_s1
 .endm
 
-    
+
+@----------------------------------------------------------------------------------
+@------------------------------------KECCAKROUND1 MACRO----------------------------
+@----------------------------------------------------------------------------------
+@This macro performs the second cyclic round of Keccak
+@----------------------------------------------------------------------------------
+
 
 .macro    KeccakRound1
     @DIFFUSION SHARE 0
@@ -1010,6 +1206,13 @@
 .endm
 
 
+@----------------------------------------------------------------------------------
+@------------------------------------KECCAKROUND2 MACRO----------------------------
+@----------------------------------------------------------------------------------
+@This macro performs the third cyclic round of Keccak
+@----------------------------------------------------------------------------------
+
+
 .macro KeccakRound2
     @DIFFUSION SHARE 0
     xor5        r3, Aku1_s0, Agu0_s0, Abu1_s0, Asu1_s0, Amu1_s0
@@ -1139,6 +1342,12 @@
     KeccakThetaRhoPiChiIota  Aba1_s1, r8,          Ake0_s1, r11, 22,      Asi1_s1, r2, 21,      Ago1_s1, r9, 10,      Amu0_s1, lr,  7, 20, 0, mDa1_s1, mDe1_s1, mDi0_s1, mDo0_s1, mDu1_s1
 .endm
 
+
+@----------------------------------------------------------------------------------
+@------------------------------------KECCAKROUND3 MACRO----------------------------
+@----------------------------------------------------------------------------------
+@This macro performs the fourth cyclic round of Keccak
+@----------------------------------------------------------------------------------
 
 .macro KeccakRound3
     @DIFFUSION SHARE 0
@@ -1277,6 +1486,11 @@ KeccakThetaRhoPiChiIota  Aba1_s1_M2, r8,          Abe1_s1_M2, r11, 22,      Abi1
 
 
 
+@----------------------------------------------------------------------------------
+@---------------------KECCAKF1600_STATEPERMUTE FUNCTION----------------------------
+@----------------------------------------------------------------------------------
+@This function sets up the round constants pointer and jumps to the permutation core (function KeccakP1600_Permute)
+@----------------------------------------------------------------------------------
 
 
 @  void KeccakF1600_StatePermute( void *state )
@@ -1320,8 +1534,11 @@ KeccakP1600_Permute_RoundConstants0Mod4:
 		.long      0x000000FF  @terminator
 
 
-
-
+@----------------------------------------------------------------------------------
+@---------------------KECCAKP1600_PERMUTE FUNCTION----------------------------
+@----------------------------------------------------------------------------------
+@This function applies the four cyclic rounds 6 times to perform a 24 rounds based Keccak
+@----------------------------------------------------------------------------------
 @ void KeccakP1600_Permute( void *state, void * rc )
 .align 8
 KeccakP1600_Permute:
