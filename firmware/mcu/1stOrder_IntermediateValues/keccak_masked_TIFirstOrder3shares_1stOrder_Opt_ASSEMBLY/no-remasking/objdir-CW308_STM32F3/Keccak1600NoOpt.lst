@@ -1,0 +1,2064 @@
+   1              	# 1 "Keccak1600NoOpt.S"
+   1              	.thumb
+   0              	
+   0              	
+   2              	.syntax unified
+   3              	.text
+   4              	.thumb_func
+   5              	
+   6              	
+   7              	
+   8              	@----------------------------------------------------------------------------------
+   9              	@----------------------------------SYMBOLIC VARIABLES------------------------------
+  10              	@----------------------------------------------------------------------------------
+  11              	@Definition of symbolic variables associated with the memory regions of the three Keccak state shar
+  12              	@Lane naming convention: A<x><y><m>_s<n>
+  13              	@  <x> = row (b=0, g=1, k=2, m=3, s=4)
+  14              	@  <y> = column (a=0, e=1, i=2, o=3, u=4)
+  15              	@  <m> = lane half (0=low/even, 1=high/odd)
+  16              	@  <n> = share index (0,1,2)
+  17              	
+  18              	@----------------------------------------------------------------------------------
+  19              	@Memory zone A (read in even rounds, written in odd rounds)
+  20              	@----------------------------------------------------------------------------------
+  21              	
+  22              	.equ Aba0_s0   , 0*4
+  23              	.equ Aba1_s0   , 1*4
+  24              	.equ Abe0_s0   , 2*4
+  25              	.equ Abe1_s0   , 3*4
+  26              	.equ Abi0_s0   , 4*4
+  27              	.equ Abi1_s0   , 5*4
+  28              	.equ Abo0_s0   , 6*4
+  29              	.equ Abo1_s0   , 7*4
+  30              	.equ Abu0_s0   , 8*4
+  31              	.equ Abu1_s0   , 9*4
+  32              	.equ Aga0_s0   , 10*4
+  33              	.equ Aga1_s0   , 11*4
+  34              	.equ Age0_s0   , 12*4
+  35              	.equ Age1_s0   , 13*4
+  36              	.equ Agi0_s0   , 14*4
+  37              	.equ Agi1_s0   , 15*4
+  38              	.equ Ago0_s0   , 16*4
+  39              	.equ Ago1_s0   , 17*4
+  40              	.equ Agu0_s0   , 18*4
+  41              	.equ Agu1_s0   , 19*4
+  42              	.equ Aka0_s0   , 20*4
+  43              	.equ Aka1_s0   , 21*4
+  44              	.equ Ake0_s0   , 22*4
+  45              	.equ Ake1_s0   , 23*4
+  46              	.equ Aki0_s0   , 24*4
+  47              	.equ Aki1_s0   , 25*4
+  48              	.equ Ako0_s0   , 26*4
+  49              	.equ Ako1_s0   , 27*4
+  50              	.equ Aku0_s0   , 28*4
+  51              	.equ Aku1_s0   , 29*4
+  52              	.equ Ama0_s0   , 30*4
+  53              	.equ Ama1_s0   , 31*4
+  54              	.equ Ame0_s0   , 32*4
+  55              	.equ Ame1_s0   , 33*4
+  56              	.equ Ami0_s0   , 34*4
+  57              	.equ Ami1_s0   , 35*4
+  58              	.equ Amo0_s0   , 36*4
+  59              	.equ Amo1_s0   , 37*4
+  60              	.equ Amu0_s0   , 38*4
+  61              	.equ Amu1_s0   , 39*4
+  62              	.equ Asa0_s0   , 40*4
+  63              	.equ Asa1_s0   , 41*4
+  64              	.equ Ase0_s0   , 42*4
+  65              	.equ Ase1_s0   , 43*4
+  66              	.equ Asi0_s0   , 44*4
+  67              	.equ Asi1_s0   , 45*4
+  68              	.equ Aso0_s0   , 46*4
+  69              	.equ Aso1_s0   , 47*4
+  70              	.equ Asu0_s0   , 48*4
+  71              	.equ Asu1_s0   , 49*4
+  72              	
+  73              	.equ Aba0_s1   , 0*4+200
+  74              	.equ Aba1_s1   , 1*4+200
+  75              	.equ Abe0_s1   , 2*4+200
+  76              	.equ Abe1_s1   , 3*4+200
+  77              	.equ Abi0_s1   , 4*4+200
+  78              	.equ Abi1_s1   , 5*4+200
+  79              	.equ Abo0_s1   , 6*4+200
+  80              	.equ Abo1_s1   , 7*4+200
+  81              	.equ Abu0_s1   , 8*4+200
+  82              	.equ Abu1_s1   , 9*4+200
+  83              	.equ Aga0_s1   , 10*4+200
+  84              	.equ Aga1_s1   , 11*4+200
+  85              	.equ Age0_s1   , 12*4+200
+  86              	.equ Age1_s1   , 13*4+200
+  87              	.equ Agi0_s1   , 14*4+200
+  88              	.equ Agi1_s1   , 15*4+200
+  89              	.equ Ago0_s1   , 16*4+200
+  90              	.equ Ago1_s1   , 17*4+200
+  91              	.equ Agu0_s1   , 18*4+200
+  92              	.equ Agu1_s1   , 19*4+200
+  93              	.equ Aka0_s1   , 20*4+200
+  94              	.equ Aka1_s1   , 21*4+200
+  95              	.equ Ake0_s1   , 22*4+200
+  96              	.equ Ake1_s1   , 23*4+200
+  97              	.equ Aki0_s1   , 24*4+200
+  98              	.equ Aki1_s1   , 25*4+200
+  99              	.equ Ako0_s1   , 26*4+200
+ 100              	.equ Ako1_s1   , 27*4+200
+ 101              	.equ Aku0_s1   , 28*4+200
+ 102              	.equ Aku1_s1   , 29*4+200
+ 103              	.equ Ama0_s1   , 30*4+200
+ 104              	.equ Ama1_s1   , 31*4+200
+ 105              	.equ Ame0_s1   , 32*4+200
+ 106              	.equ Ame1_s1   , 33*4+200
+ 107              	.equ Ami0_s1   , 34*4+200
+ 108              	.equ Ami1_s1   , 35*4+200
+ 109              	.equ Amo0_s1   , 36*4+200
+ 110              	.equ Amo1_s1   , 37*4+200
+ 111              	.equ Amu0_s1   , 38*4+200
+ 112              	.equ Amu1_s1   , 39*4+200
+ 113              	.equ Asa0_s1   , 40*4+200
+ 114              	.equ Asa1_s1   , 41*4+200
+ 115              	.equ Ase0_s1   , 42*4+200
+ 116              	.equ Ase1_s1   , 43*4+200
+ 117              	.equ Asi0_s1   , 44*4+200
+ 118              	.equ Asi1_s1   , 45*4+200
+ 119              	.equ Aso0_s1   , 46*4+200
+ 120              	.equ Aso1_s1   , 47*4+200
+ 121              	.equ Asu0_s1   , 48*4+200
+ 122              	.equ Asu1_s1   , 49*4+200
+ 123              	
+ 124              	.equ Aba0_s2   , 0*4+400
+ 125              	.equ Aba1_s2   , 1*4+400
+ 126              	.equ Abe0_s2   , 2*4+400
+ 127              	.equ Abe1_s2   , 3*4+400
+ 128              	.equ Abi0_s2   , 4*4+400
+ 129              	.equ Abi1_s2   , 5*4+400
+ 130              	.equ Abo0_s2   , 6*4+400
+ 131              	.equ Abo1_s2   , 7*4+400
+ 132              	.equ Abu0_s2   , 8*4+400
+ 133              	.equ Abu1_s2   , 9*4+400
+ 134              	.equ Aga0_s2   , 10*4+400
+ 135              	.equ Aga1_s2   , 11*4+400
+ 136              	.equ Age0_s2   , 12*4+400
+ 137              	.equ Age1_s2   , 13*4+400
+ 138              	.equ Agi0_s2   , 14*4+400
+ 139              	.equ Agi1_s2   , 15*4+400
+ 140              	.equ Ago0_s2   , 16*4+400
+ 141              	.equ Ago1_s2   , 17*4+400
+ 142              	.equ Agu0_s2   , 18*4+400
+ 143              	.equ Agu1_s2   , 19*4+400
+ 144              	.equ Aka0_s2   , 20*4+400
+ 145              	.equ Aka1_s2   , 21*4+400
+ 146              	.equ Ake0_s2   , 22*4+400
+ 147              	.equ Ake1_s2   , 23*4+400
+ 148              	.equ Aki0_s2   , 24*4+400
+ 149              	.equ Aki1_s2   , 25*4+400
+ 150              	.equ Ako0_s2   , 26*4+400
+ 151              	.equ Ako1_s2   , 27*4+400
+ 152              	.equ Aku0_s2   , 28*4+400
+ 153              	.equ Aku1_s2   , 29*4+400
+ 154              	.equ Ama0_s2   , 30*4+400
+ 155              	.equ Ama1_s2   , 31*4+400
+ 156              	.equ Ame0_s2   , 32*4+400
+ 157              	.equ Ame1_s2   , 33*4+400
+ 158              	.equ Ami0_s2   , 34*4+400
+ 159              	.equ Ami1_s2   , 35*4+400
+ 160              	.equ Amo0_s2   , 36*4+400
+ 161              	.equ Amo1_s2   , 37*4+400
+ 162              	.equ Amu0_s2   , 38*4+400
+ 163              	.equ Amu1_s2   , 39*4+400
+ 164              	.equ Asa0_s2   , 40*4+400
+ 165              	.equ Asa1_s2   , 41*4+400
+ 166              	.equ Ase0_s2   , 42*4+400
+ 167              	.equ Ase1_s2   , 43*4+400
+ 168              	.equ Asi0_s2   , 44*4+400
+ 169              	.equ Asi1_s2   , 45*4+400
+ 170              	.equ Aso0_s2   , 46*4+400
+ 171              	.equ Aso1_s2   , 47*4+400
+ 172              	.equ Asu0_s2   , 48*4+400
+ 173              	.equ Asu1_s2   , 49*4+400
+ 174              	
+ 175              	
+ 176              	@----------------------------------------------------------------------------------
+ 177              	@Memory zone B (written in even rounds, read in odd rounds)
+ 178              	@----------------------------------------------------------------------------------
+ 179              	
+ 180              	
+ 181              	.equ Aba0_s0_M2   , 0*4+600
+ 182              	.equ Aba1_s0_M2   , 1*4+600
+ 183              	.equ Abe0_s0_M2   , 2*4+600
+ 184              	.equ Abe1_s0_M2   , 3*4+600
+ 185              	.equ Abi0_s0_M2   , 4*4+600
+ 186              	.equ Abi1_s0_M2   , 5*4+600
+ 187              	.equ Abo0_s0_M2   , 6*4+600
+ 188              	.equ Abo1_s0_M2   , 7*4+600
+ 189              	.equ Abu0_s0_M2   , 8*4+600
+ 190              	.equ Abu1_s0_M2   , 9*4+600
+ 191              	.equ Aga0_s0_M2   , 10*4+600
+ 192              	.equ Aga1_s0_M2   , 11*4+600
+ 193              	.equ Age0_s0_M2   , 12*4+600
+ 194              	.equ Age1_s0_M2   , 13*4+600
+ 195              	.equ Agi0_s0_M2   , 14*4+600
+ 196              	.equ Agi1_s0_M2   , 15*4+600
+ 197              	.equ Ago0_s0_M2   , 16*4+600
+ 198              	.equ Ago1_s0_M2   , 17*4+600
+ 199              	.equ Agu0_s0_M2   , 18*4+600
+ 200              	.equ Agu1_s0_M2   , 19*4+600
+ 201              	.equ Aka0_s0_M2   , 20*4+600
+ 202              	.equ Aka1_s0_M2   , 21*4+600
+ 203              	.equ Ake0_s0_M2   , 22*4+600
+ 204              	.equ Ake1_s0_M2   , 23*4+600
+ 205              	.equ Aki0_s0_M2   , 24*4+600
+ 206              	.equ Aki1_s0_M2   , 25*4+600
+ 207              	.equ Ako0_s0_M2   , 26*4+600
+ 208              	.equ Ako1_s0_M2   , 27*4+600
+ 209              	.equ Aku0_s0_M2   , 28*4+600
+ 210              	.equ Aku1_s0_M2   , 29*4+600
+ 211              	.equ Ama0_s0_M2   , 30*4+600
+ 212              	.equ Ama1_s0_M2   , 31*4+600
+ 213              	.equ Ame0_s0_M2   , 32*4+600
+ 214              	.equ Ame1_s0_M2   , 33*4+600
+ 215              	.equ Ami0_s0_M2   , 34*4+600
+ 216              	.equ Ami1_s0_M2   , 35*4+600
+ 217              	.equ Amo0_s0_M2   , 36*4+600
+ 218              	.equ Amo1_s0_M2   , 37*4+600
+ 219              	.equ Amu0_s0_M2   , 38*4+600
+ 220              	.equ Amu1_s0_M2   , 39*4+600
+ 221              	.equ Asa0_s0_M2   , 40*4+600
+ 222              	.equ Asa1_s0_M2   , 41*4+600
+ 223              	.equ Ase0_s0_M2   , 42*4+600
+ 224              	.equ Ase1_s0_M2   , 43*4+600
+ 225              	.equ Asi0_s0_M2   , 44*4+600
+ 226              	.equ Asi1_s0_M2   , 45*4+600
+ 227              	.equ Aso0_s0_M2   , 46*4+600
+ 228              	.equ Aso1_s0_M2   , 47*4+600
+ 229              	.equ Asu0_s0_M2   , 48*4+600
+ 230              	.equ Asu1_s0_M2   , 49*4+600
+ 231              	
+ 232              	
+ 233              	.equ Aba0_s1_M2   , 0*4+800
+ 234              	.equ Aba1_s1_M2   , 1*4+800
+ 235              	.equ Abe0_s1_M2   , 2*4+800
+ 236              	.equ Abe1_s1_M2   , 3*4+800
+ 237              	.equ Abi0_s1_M2   , 4*4+800
+ 238              	.equ Abi1_s1_M2   , 5*4+800
+ 239              	.equ Abo0_s1_M2   , 6*4+800
+ 240              	.equ Abo1_s1_M2   , 7*4+800
+ 241              	.equ Abu0_s1_M2   , 8*4+800
+ 242              	.equ Abu1_s1_M2   , 9*4+800
+ 243              	.equ Aga0_s1_M2   , 10*4+800
+ 244              	.equ Aga1_s1_M2   , 11*4+800
+ 245              	.equ Age0_s1_M2   , 12*4+800
+ 246              	.equ Age1_s1_M2   , 13*4+800
+ 247              	.equ Agi0_s1_M2   , 14*4+800
+ 248              	.equ Agi1_s1_M2   , 15*4+800
+ 249              	.equ Ago0_s1_M2   , 16*4+800
+ 250              	.equ Ago1_s1_M2   , 17*4+800
+ 251              	.equ Agu0_s1_M2   , 18*4+800
+ 252              	.equ Agu1_s1_M2   , 19*4+800
+ 253              	.equ Aka0_s1_M2   , 20*4+800
+ 254              	.equ Aka1_s1_M2   , 21*4+800
+ 255              	.equ Ake0_s1_M2   , 22*4+800
+ 256              	.equ Ake1_s1_M2   , 23*4+800
+ 257              	.equ Aki0_s1_M2   , 24*4+800
+ 258              	.equ Aki1_s1_M2   , 25*4+800
+ 259              	.equ Ako0_s1_M2   , 26*4+800
+ 260              	.equ Ako1_s1_M2   , 27*4+800
+ 261              	.equ Aku0_s1_M2   , 28*4+800
+ 262              	.equ Aku1_s1_M2   , 29*4+800
+ 263              	.equ Ama0_s1_M2   , 30*4+800
+ 264              	.equ Ama1_s1_M2   , 31*4+800
+ 265              	.equ Ame0_s1_M2   , 32*4+800
+ 266              	.equ Ame1_s1_M2   , 33*4+800
+ 267              	.equ Ami0_s1_M2   , 34*4+800
+ 268              	.equ Ami1_s1_M2   , 35*4+800
+ 269              	.equ Amo0_s1_M2   , 36*4+800
+ 270              	.equ Amo1_s1_M2   , 37*4+800
+ 271              	.equ Amu0_s1_M2   , 38*4+800
+ 272              	.equ Amu1_s1_M2   , 39*4+800
+ 273              	.equ Asa0_s1_M2   , 40*4+800
+ 274              	.equ Asa1_s1_M2   , 41*4+800
+ 275              	.equ Ase0_s1_M2   , 42*4+800
+ 276              	.equ Ase1_s1_M2   , 43*4+800
+ 277              	.equ Asi0_s1_M2   , 44*4+800
+ 278              	.equ Asi1_s1_M2   , 45*4+800
+ 279              	.equ Aso0_s1_M2   , 46*4+800
+ 280              	.equ Aso1_s1_M2   , 47*4+800
+ 281              	.equ Asu0_s1_M2   , 48*4+800
+ 282              	.equ Asu1_s1_M2   , 49*4+800
+ 283              	
+ 284              	
+ 285              	.equ Aba0_s2_M2   , 0*4+1000
+ 286              	.equ Aba1_s2_M2   , 1*4+1000
+ 287              	.equ Abe0_s2_M2   , 2*4+1000
+ 288              	.equ Abe1_s2_M2   , 3*4+1000
+ 289              	.equ Abi0_s2_M2   , 4*4+1000
+ 290              	.equ Abi1_s2_M2   , 5*4+1000
+ 291              	.equ Abo0_s2_M2   , 6*4+1000
+ 292              	.equ Abo1_s2_M2   , 7*4+1000
+ 293              	.equ Abu0_s2_M2   , 8*4+1000
+ 294              	.equ Abu1_s2_M2   , 9*4+1000
+ 295              	.equ Aga0_s2_M2   , 10*4+1000
+ 296              	.equ Aga1_s2_M2   , 11*4+1000
+ 297              	.equ Age0_s2_M2   , 12*4+1000
+ 298              	.equ Age1_s2_M2   , 13*4+1000
+ 299              	.equ Agi0_s2_M2   , 14*4+1000
+ 300              	.equ Agi1_s2_M2   , 15*4+1000
+ 301              	.equ Ago0_s2_M2   , 16*4+1000
+ 302              	.equ Ago1_s2_M2   , 17*4+1000
+ 303              	.equ Agu0_s2_M2   , 18*4+1000
+ 304              	.equ Agu1_s2_M2   , 19*4+1000
+ 305              	.equ Aka0_s2_M2   , 20*4+1000
+ 306              	.equ Aka1_s2_M2   , 21*4+1000
+ 307              	.equ Ake0_s2_M2   , 22*4+1000
+ 308              	.equ Ake1_s2_M2   , 23*4+1000
+ 309              	.equ Aki0_s2_M2   , 24*4+1000
+ 310              	.equ Aki1_s2_M2   , 25*4+1000
+ 311              	.equ Ako0_s2_M2   , 26*4+1000
+ 312              	.equ Ako1_s2_M2   , 27*4+1000
+ 313              	.equ Aku0_s2_M2   , 28*4+1000
+ 314              	.equ Aku1_s2_M2   , 29*4+1000
+ 315              	.equ Ama0_s2_M2   , 30*4+1000
+ 316              	.equ Ama1_s2_M2   , 31*4+1000
+ 317              	.equ Ame0_s2_M2   , 32*4+1000
+ 318              	.equ Ame1_s2_M2   , 33*4+1000
+ 319              	.equ Ami0_s2_M2   , 34*4+1000
+ 320              	.equ Ami1_s2_M2   , 35*4+1000
+ 321              	.equ Amo0_s2_M2   , 36*4+1000
+ 322              	.equ Amo1_s2_M2   , 37*4+1000
+ 323              	.equ Amu0_s2_M2   , 38*4+1000
+ 324              	.equ Amu1_s2_M2   , 39*4+1000
+ 325              	.equ Asa0_s2_M2   , 40*4+1000
+ 326              	.equ Asa1_s2_M2   , 41*4+1000
+ 327              	.equ Ase0_s2_M2   , 42*4+1000
+ 328              	.equ Ase1_s2_M2   , 43*4+1000
+ 329              	.equ Asi0_s2_M2   , 44*4+1000
+ 330              	.equ Asi1_s2_M2   , 45*4+1000
+ 331              	.equ Aso0_s2_M2   , 46*4+1000
+ 332              	.equ Aso1_s2_M2   , 47*4+1000
+ 333              	.equ Asu0_s2_M2   , 48*4+1000
+ 334              	.equ Asu1_s2_M2   , 49*4+1000
+ 335              	
+ 336              	@--------------------------------------------------------------------------------------------------
+ 337              	@Definition of symbolic variables associated with the memory regions of diffusions for each column 
+ 338              	@--------------------------------------------------------------------------------------------------
+ 339              	
+ 340              	@   --- offsets on stack
+ 341              	.equ mDa0_s0   , 0*4+1200
+ 342              	.equ mDa1_s0   , 1*4+1200
+ 343              	.equ mDe0_s0   , 2*4+1200
+ 344              	.equ mDe1_s0   , 3*4+1200
+ 345              	.equ mDi0_s0   , 4*4+1200
+ 346              	.equ mDi1_s0   , 5*4+1200
+ 347              	.equ mDo0_s0   , 6*4+1200
+ 348              	.equ mDo1_s0   , 7*4+1200
+ 349              	.equ mDu0_s0   , 8*4+1200
+ 350              	.equ mDu1_s0   , 9*4+1200
+ 351              	
+ 352              	.equ mDa0_s1   , 10*4+1200
+ 353              	.equ mDa1_s1   , 11*4+1200
+ 354              	.equ mDe0_s1   , 12*4+1200
+ 355              	.equ mDe1_s1   , 13*4+1200
+ 356              	.equ mDi0_s1   , 14*4+1200
+ 357              	.equ mDi1_s1   , 15*4+1200
+ 358              	.equ mDo0_s1   , 16*4+1200
+ 359              	.equ mDo1_s1   , 17*4+1200
+ 360              	.equ mDu0_s1   , 18*4+1200
+ 361              	.equ mDu1_s1   , 19*4+1200
+ 362              	
+ 363              	.equ mDa0_s2   , 20*4+1200
+ 364              	.equ mDa1_s2   , 21*4+1200
+ 365              	.equ mDe0_s2   , 22*4+1200
+ 366              	.equ mDe1_s2   , 23*4+1200
+ 367              	.equ mDi0_s2   , 24*4+1200
+ 368              	.equ mDi1_s2   , 25*4+1200
+ 369              	.equ mDo0_s2   , 26*4+1200
+ 370              	.equ mDo1_s2   , 27*4+1200
+ 371              	.equ mDu0_s2   , 28*4+1200
+ 372              	.equ mDu1_s2   , 29*4+1200
+ 373              	
+ 374              	@----------------------------------------------------------------------------------
+ 375              	@Definition of symbolic variable associated with round counter
+ 376              	@----------------------------------------------------------------------------------
+ 377              	.equ mRC    , 30*4+1200
+ 378              	
+ 379              	
+ 380              	@----------------------------------------------------------------------------------
+ 381              	@Definition of symbolic variable associated with registers
+ 382              	@----------------------------------------------------------------------------------
+ 383              	.equ memR0  , 31*4+1200
+ 384              	.equ memR1  , 32*4+1200
+ 385              	.equ memR2  , 33*4+1200
+ 386              	.equ memR3  , 34*4+1200
+ 387              	.equ memR4  , 35*4+1200
+ 388              	.equ memR5  , 36*4+1200
+ 389              	.equ memR6  , 37*4+1200
+ 390              	.equ memR7  , 38*4+1200
+ 391              	.equ memR8  , 39*4+1200
+ 392              	.equ memR9  , 40*4+1200
+ 393              	.equ memR10 , 41*4+1200
+ 394              	.equ memR11 , 42*4+1200
+ 395              	.equ memR12 , 43*4+1200
+ 396              	.equ memLR ,  44*4+1200
+ 397              	
+ 398              	
+ 399              	@----------------------------------------------------------------------------------
+ 400              	@-----------------------------------------XOR5 MACRO-------------------------------
+ 401              	@----------------------------------------------------------------------------------
+ 402              	@Used in theta step (at the beginning of each macro KeccakRound0, KeccakRound1, 
+ 403              	@KeccakRound2, KeccakRound3) to compute the parities C(x) of each column (considering
+ 404              	@a particular half and share). 
+ 405              	@
+ 406              	@It receives as inputs:
+ 407              	@   -i1, i2, i3, i4, i5: memory addresses where 32-bit lanes from the same column, half, and share
+ 408              	@                        are stored in the INPUT SPACE
+ 409              	@   -res: register where the parity value will be stored 
+ 410              	@
+ 411              	@This macro XORs all i1, i2, i3, i4, i5 inputs and stores the result in the "res" register
+ 412              	@
+ 413              	@Equivalent operation: res <-- i1 XOR i2 XOR i3 XOR i4 XOR i5
+ 414              	@
+ 415              	@Intermediate registers: r1, r2, r12
+ 416              	@----------------------------------------------------------------------------------
+ 417              	
+ 418              	
+ 419              	.macro    xor5      res, i1, i2, i3, i4, i5
+ 420              	    ldr         \res, [r0, #\i1]
+ 421              	    ldr         r1, [r0, #\i2]
+ 422              	    ldr         r2, [r0, #\i3]
+ 423              	    ldr         r12, [r0, #\i4]
+ 424              	    eors        \res, \res, r1
+ 425              	    eors        \res, \res, r2
+ 426              	    eors        \res, \res, r12
+ 427              	    ldr         r1, [r0, #\i5]
+ 428              	    eors        \res, \res, r1
+ 429              	.endm
+ 430              	
+ 431              	
+ 432              	@----------------------------------------------------------------------------------
+ 433              	@----------------------------------------XORROL MACRO------------------------------
+ 434              	@----------------------------------------------------------------------------------
+ 435              	@Used in theta step (at the beginning of each macro KeccakRound0, KeccakRound1, 
+ 436              	@KeccakRound2, KeccakRound3) to compute the diffusions D(x) of low halfs of the lanes
+ 437              	@in the OUTPUT space.
+ 438              	@
+ 439              	@It receives as inputs:
+ 440              	@   -aa, bb: registers containing the 32-bit half-lanes that will be XORed
+ 441              	@   -res: register where the resulting 
+ 442              	@ 
+ 443              	@This macro XORs the input "aa" with the input "bb" rotated left by 1 bit,
+ 444              	@and stores it in the "res" register.
+ 445              	@
+ 446              	@Equivalent operation: res <-- aa XOR ROTL(bb, 1)
+ 447              	@
+ 448              	@Intermediate registers: None
+ 449              	@----------------------------------------------------------------------------------
+ 450              	
+ 451              	
+ 452              	
+ 453              	.macro    xorrol      res, aa, bb
+ 454              	    eor         \res, \aa, \bb, ROR #31
+ 455              	.endm
+ 456              	
+ 457              	
+ 458              	@----------------------------------------------------------------------------------
+ 459              	@----------------------------------------OPCHI MACRO-------------------------------
+ 460              	@----------------------------------------------------------------------------------
+ 461              	@Used in the macros KeccakThetaRhoPiChi and KeccakThetaRhoPiChiIota to
+ 462              	@compute the masked Chi function for one given share.
+ 463              	@
+ 464              	@For a given row, it computes the share j of the lane i (Y^i_j) at the output of the 
+ 465              	@Chi step using the 32-bit half-lanes i, i+1, i+2 of the shares j+1, j+2 (X_{j+1}, X_{j+2})
+ 466              	@
+ 467              	@It receives as inputs:
+ 468              	@   -Ia0, Ia1, Ia2: for a given row, registers containing the 32-bit half-lanes i, i+1, i+2 of the 
+ 469              	@   -Ib1, Ib2: for a given row, registers containing the 32-bit half-lanes i+1, i+2 of the share j+
+ 470              	@   -memW: memory address where the resulting Y^i_j will be stored
+ 471              	@
+ 472              	@Equivalent operation: Y^i_j <-- f(X_{j+1}, X_{j+2}) = 
+ 473              	@ =X^{i}_{j+1} XOR X^{i+2}_{j+1} XOR (X^{i+1}_{j+1} & X^{i+2}_{j+1}) XOR (X^{i+1}_{j+1} & X^{i+2}_{
+ 474              	@
+ 475              	@Intermediate registers: r1, r2
+ 476              	@----------------------------------------------------------------------------------
+ 477              	
+ 478              	
+ 479              	
+ 480              	.macro    OpChi      memW, Ib1, Ib2, Ia0, Ia1, Ia2
+ 481              	    eors r1, \Ia0, \Ia2
+ 482              	    and r2, \Ia1, \Ia2
+ 483              	    eors r1, r1, r2
+ 484              	    and r2, \Ia1, \Ib2
+ 485              	    eors r1, r1, r2
+ 486              	    and r2, \Ib1, \Ia2 
+ 487              	    eors r1, r1, r2
+ 488              	    str r1, [r0, \memW]
+ 489              	.endm
+ 490              	
+ 491              	
+ 492              	@----------------------------------------------------------------------------------
+ 493              	@----------------------------------KECCAKTHETARHOPICHI MACRO-----------------------
+ 494              	@----------------------------------------------------------------------------------
+ 495              	@Used in the macros KeccakRound0, KeccakRound1, KeccakRound2, KeccakRound3 to compute
+ 496              	@the steps Theta, Rho, Pi Chi.
+ 497              	@
+ 498              	@It receives as inputs:
+ 499              	@   -reg_Aya, reg_Aye, reg_Ayi, reg_Ayo, reg_Ayu: given the diagonal defined for in-place processin
+ 500              	@   -reg_AyaB, reg_AyeB, reg_AyiB, reg_AyoB, reg_AyuB: given the diagonal defined for in-place proc
+ 501              	@   -memAya, memAye, memAyi, memAyo, memAyu: given the diagonal defined for in-place processing, me
+ 502              	@   -Dya, Dye, Dyi, Dyo, Dyu: registers where the diffusion values for each half-lane OF THE SHARE 
+ 503              	@   -memDya, memDye, memDyi, memDyo, memDyu: memory addresses where the diffusion values for each h
+ 504              	@   -rotAya, rotAye, rotAyi, rotAyo, rotAyu: rotation values for each half-lane according to rho st
+ 505              	@
+ 506              	@Although the group A and group B of registers contains always {r3-r7} and {r8-r12}, respectively, 
+ 507              	@----------------------------------------------------------------------------------
+ 508              	
+ 509              	
+ 510              	
+ 511              	.macro    KeccakThetaRhoPiChi reg_Aya, memAya, Dya, rotAya, reg_Aye, memAye, Dye, rotAye, reg_Ayi, 
+ 512              	    @THETA+RHO APPLIED TO S1
+ 513              	    push {r2, r8, r9, r10, r11, r12, lr}
+ 514              	
+ 515              	
+ 516              	    @Loading the half-lanes of share 1 into the group A registers
+ 517              	    ldr     \reg_Aya, [r0, #\memAya]
+ 518              	    ldr     \reg_Aye, [r0, #\memAye]
+ 519              	    ldr     \reg_Ayi, [r0, #\memAyi]
+ 520              	    ldr     \reg_Ayo, [r0, #\memAyo]
+ 521              	    ldr     \reg_Ayu, [r0, #\memAyu]
+ 522              	
+ 523              	    @ Applying diffusion values to the lanes of share 1
+ 524              	    eors    \reg_Aya, \reg_Aya, \Dya
+ 525              	    eors    \reg_Aye, \reg_Aye, \Dye
+ 526              	    eors    \reg_Ayi, \reg_Ayi, \Dyi
+ 527              	    eors    \reg_Ayo, \reg_Ayo, \Dyo
+ 528              	    eors    \reg_Ayu, \reg_Ayu, \Dyu
+ 529              	
+ 530              	
+ 531              	    @ Applying rotations of the Rho step to the half-lanes of share 1
+ 532              	    rors    \reg_Aya, #32-\rotAya
+ 533              	    .if  \rotAye > 0
+ 534              	        rors    \reg_Aye, #32-\rotAye
+ 535              	    .endif
+ 536              	    rors    \reg_Ayi, #32-\rotAyi
+ 537              	    rors    \reg_Ayo, #32-\rotAyo
+ 538              	    rors    \reg_Ayu, #32-\rotAyu
+ 539              	
+ 540              	
+ 541              	    @ Storing half-lanes of the share 1 after applying Theta+Rho
+ 542              	    str \reg_Aya, [r0, #\memAya]
+ 543              	    str \reg_Aye, [r0, #\memAye]
+ 544              	    str \reg_Ayi, [r0, #\memAyi]
+ 545              	    str \reg_Ayo, [r0, #\memAyo]
+ 546              	    str \reg_Ayu, [r0, #\memAyu]
+ 547              	
+ 548              	
+ 549              	
+ 550              	    @THETA+RHO APPLIED TO S2 
+ 551              	    @Loading the half-lanes of share 2 into the group B registers 
+ 552              	    @Loading the diffusion values for the half-lanes of share 2 into the auxiliar registers r1, r2,
+ 553              	    @Applying diffusion values to the half lanes of share 2
+ 554              	    
+ 555              	    ldr     \reg_AyaB, [r0, #\memAya+200]
+ 556              	    ldr     r1, [r0, #\memDya+40]
+ 557              	    ldr     \reg_AyeB, [r0, #\memAye+200]
+ 558              	    ldr     r2, [r0, #\memDye+40]
+ 559              	    ldr     \reg_AyiB, [r0, #\memAyi+200]
+ 560              	    ldr     lr, [r0, #\memDyi+40]
+ 561              	
+ 562              	    eors    \reg_AyaB, \reg_AyaB, r1
+ 563              	    eors    \reg_AyeB, \reg_AyeB, r2
+ 564              	    eors    \reg_AyiB, \reg_AyiB, lr
+ 565              	
+ 566              	    ldr     \reg_AyoB, [r0, #\memAyo+200]
+ 567              	    ldr     r1, [r0, #\memDyo+40]
+ 568              	    ldr     \reg_AyuB, [r0, #\memAyu+200]
+ 569              	    ldr     lr, [r0, #\memDyu+40]
+ 570              	    
+ 571              	    eors    \reg_AyoB, \reg_AyoB, r1
+ 572              	    eors    \reg_AyuB, \reg_AyuB, lr   
+ 573              	    
+ 574              	    @ Applying rotations of the Rho step to the half-lanes of share 2
+ 575              	    rors    \reg_AyaB, #32-\rotAya
+ 576              	    .if  \rotAye > 0
+ 577              	        rors    \reg_AyeB, #32-\rotAye
+ 578              	    .endif
+ 579              	    rors    \reg_AyiB, #32-\rotAyi
+ 580              	    rors    \reg_AyoB, #32-\rotAyo
+ 581              	    rors    \reg_AyuB, #32-\rotAyu
+ 582              	
+ 583              	
+ 584              	
+ 585              	    @PI+CHI APPLIED TO SHARE 0 (SHARES 1 - 2). 
+ 586              	    @At this point, the register values are:
+ 587              	    @   - r3-r7: half-lanes of the share 1 with Theta and Rho steps applied (Group A)
+ 588              	    @   - r8-r12: half-lanes of the share 2 with Theta and Rho steps applied (Group B)
+ 589              	
+ 590              	    @The following expansions of OpChi macro computes the output share Y_0 from input shares
+ 591              	    @X_1, X_2 and write them in the corresponding memory address according to in-place processing
+ 592              	    @(it will be one of the other positions in the diagonal, but not the same)
+ 593              	    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read
+ 594              	
+ 595              	    .if     \memAya < 599
+ 596              	        OpChi   #\memAya+400, r9, r10, r3, r4, r5
+ 597              	        OpChi   #\memAye+400, r10, r11, r4, r5, r6
+ 598              	        OpChi   #\memAyi+400, r11, r12, r5, r6, r7
+ 599              	        OpChi   #\memAyo+400, r12, r8, r6, r7, r3
+ 600              	        OpChi   #\memAyu+400, r8, r9, r7, r3, r4
+ 601              	    .else 
+ 602              	        OpChi   #\memAya-800, r9, r10, r3, r4, r5
+ 603              	        OpChi   #\memAye-800, r10, r11, r4, r5, r6
+ 604              	        OpChi   #\memAyi-800, r11, r12, r5, r6, r7
+ 605              	        OpChi   #\memAyo-800, r12, r8, r6, r7, r3
+ 606              	        OpChi   #\memAyu-800, r8, r9, r7, r3, r4
+ 607              	    .endif
+ 608              	
+ 609              	
+ 610              	
+ 611              	    @THETA+RHO APPLIED TO S0
+ 612              	
+ 613              	    @Loading the half-lanes of share 0 into the group A of registers 
+ 614              	    @Loading the diffusion values for the half-lanes of share 2 into the auxiliar registers r1, r2,
+ 615              	    @Applying diffusion values to the half lanes of share 2
+ 616              	
+ 617              	    ldr     \reg_Aya, [r0, #\memAya-200]
+ 618              	    ldr     r1, [r0, #\memDya-40]
+ 619              	    ldr     \reg_Aye, [r0, #\memAye-200]
+ 620              	    ldr     r2, [r0, #\memDye-40]
+ 621              	    ldr     \reg_Ayi, [r0, #\memAyi-200]
+ 622              	    ldr     lr, [r0, #\memDyi-40]
+ 623              	
+ 624              	    eors    \reg_Aya, \reg_Aya, r1
+ 625              	    eors    \reg_Aye, \reg_Aye, r2
+ 626              	    eors    \reg_Ayi, \reg_Ayi, lr
+ 627              	
+ 628              	
+ 629              	    ldr     \reg_Ayo, [r0, #\memAyo-200]
+ 630              	    ldr     r1, [r0, #\memDyo-40]
+ 631              	    ldr     \reg_Ayu, [r0, #\memAyu-200]
+ 632              	    ldr     lr, [r0, #\memDyu-40]
+ 633              	    
+ 634              	    eors    \reg_Ayo, \reg_Ayo, r1
+ 635              	    eors    \reg_Ayu, \reg_Ayu, lr
+ 636              	    
+ 637              	    @ Applying rotations of the Rho step to the half-lanes of share 2
+ 638              	
+ 639              	    rors    \reg_Aya, #32-\rotAya
+ 640              	    .if  \rotAye > 0
+ 641              	        rors    \reg_Aye, #32-\rotAye
+ 642              	    .endif
+ 643              	    rors    \reg_Ayi, #32-\rotAyi
+ 644              	    rors    \reg_Ayo, #32-\rotAyo
+ 645              	    rors    \reg_Ayu, #32-\rotAyu
+ 646              	
+ 647              	
+ 648              	
+ 649              	    @PI+CHI APPLIED TO SHARE 1 (SHARES 2 - 0)
+ 650              	    @At this point, the register values are:
+ 651              	    @   - r3-r7: half-lanes of the share 0 with Theta and Rho steps applied (Group A)
+ 652              	    @   - r8-r12: half-lanes of the share 2 with Theta and Rho steps applied (Group B)
+ 653              	    @The following expansions of OpChi macro computes the output share Y_1 from input shares
+ 654              	    @X_2, X_0 and write them in the corresponding memory address according to in-place processing
+ 655              	    @(it will be one of the other positions in the diagonal, but not the same)
+ 656              	    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read
+ 657              	    
+ 658              	    .if     \memAya < 599
+ 659              	        OpChi   #\memAya+600, r4, r5, r8, r9, r10
+ 660              	        OpChi   #\memAye+600, r5, r6, r9, r10, r11
+ 661              	        OpChi   #\memAyi+600, r6, r7, r10, r11, r12
+ 662              	        OpChi   #\memAyo+600, r7, r3, r11, r12, r8
+ 663              	        OpChi   #\memAyu+600, r3, r4, r12, r8, r9
+ 664              	    .else 
+ 665              	        OpChi   #\memAya-600, r4, r5, r8, r9, r10
+ 666              	        OpChi   #\memAye-600, r5, r6, r9, r10, r11
+ 667              	        OpChi   #\memAyi-600, r6, r7, r10, r11, r12
+ 668              	        OpChi   #\memAyo-600, r7, r3, r11, r12, r8
+ 669              	        OpChi   #\memAyu-600, r3, r4, r12, r8, r9
+ 670              	    .endif
+ 671              	
+ 672              	
+ 673              	    @PI+CHI APPLIED TO SHARE 2 (SHARES 0 - 1). Stack at this point (old --> new): r8-r12: Diffusion
+ 674              	    
+ 675              	    @Loading the half-lanes of share 1 (Theta+Rho already applied) into the group B of registers 
+ 676              	
+ 677              	    ldr     \reg_AyaB, [r0, #\memAya]             
+ 678              	    ldr     \reg_AyeB, [r0, #\memAye]         
+ 679              	    ldr     \reg_AyiB, [r0, #\memAyi]            
+ 680              	    ldr     \reg_AyoB, [r0, #\memAyo]           
+ 681              	    ldr     \reg_AyuB, [r0, #\memAyu]           
+ 682              	
+ 683              	    @At this point, the register values are:
+ 684              	    @   - r3-r7: half-lanes of the share 0 with Theta and Rho steps applied (Group A)
+ 685              	    @   - r8-r12: half-lanes of the share 1 with Theta and Rho steps applied (Group B)
+ 686              	    @The following expansions of OpChi macro computes the output share Y_2 from input shares
+ 687              	    @X_0, X_1 and write them in the corresponding memory address according to in-place processing
+ 688              	    @(it will be one of the other positions in the diagonal, but not the same)
+ 689              	    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read
+ 690              	
+ 691              	    .if     \memAya < 599
+ 692              	        OpChi   #\memAya+800, r9, r10, r3, r4, r5
+ 693              	        OpChi   #\memAye+800, r10, r11, r4, r5, r6
+ 694              	        OpChi   #\memAyi+800, r11, r12, r5, r6, r7
+ 695              	        OpChi   #\memAyo+800, r12, r8, r6, r7, r3
+ 696              	        OpChi   #\memAyu+800, r8, r9, r7, r3, r4
+ 697              	    .else 
+ 698              	        OpChi   #\memAya-400, r9, r10, r3, r4, r5
+ 699              	        OpChi   #\memAye-400, r10, r11, r4, r5, r6
+ 700              	        OpChi   #\memAyi-400, r11, r12, r5, r6, r7
+ 701              	        OpChi   #\memAyo-400, r12, r8, r6, r7, r3
+ 702              	        OpChi   #\memAyu-400, r8, r9, r7, r3, r4
+ 703              	    .endif
+ 704              	
+ 705              	
+ 706              	    pop {r2, r8, r9, r10, r11, r12, lr}
+ 707              	.endm
+ 708              	
+ 709              	
+ 710              	
+ 711              	@----------------------------------------------------------------------------------
+ 712              	@--------------------------------KECCAKTHETARHOPICHIIOTA MACRO---------------------
+ 713              	@----------------------------------------------------------------------------------
+ 714              	@Used in the macros KeccakRound0, KeccakRound1, KeccakRound2, KeccakRound3 to compute
+ 715              	@the steps Theta, Rho, Pi, Chi, and apply the Round Constant of Iota step to lane Aba (0,0)
+ 716              	@
+ 717              	@It receives as inputs:
+ 718              	@   -memAya, memAye, memAyi, memAyo, memAyu: given the diagonal defined for in-place processing, me
+ 719              	@   -Dya, Dye, Dyi, Dyo, Dyu: registers where the diffusion values for each half-lane OF THE SHARE 
+ 720              	@   -rotAya, rotAye, rotAyi, rotAyo, rotAyu: rotation values for each half-lane according to rho st
+ 721              	@   -memDya, memDye, memDyi, memDyo, memDyu: memory addresses where the diffusion values for each h
+ 722              	@   -offset: offset applied to access to the round constant of Iota step
+ 723              	@   -last: flag to indicate if this is the last Iota applied in the fourth cyclic round
+ 724              	@Registers where lanes will be stores are fixed, due to the fact that this macro processes always t
+ 725              	@same diagonal (Aba, Age, Aki, Amo, Asu) --> Registers {r3-r7} and {r8-r12} of groups A and B, resp
+ 726              	
+ 727              	@----------------------------------------------------------------------------------
+ 728              	
+ 729              	.macro    KeccakThetaRhoPiChiIota  memAya, Dya, memAye, Dye, rotAye, memAyi, Dyi, rotAyi, memAyo, D
+ 730              	    
+ 731              	    @THETA+RHO APPLIED TO S1
+ 732              	    push {r2, r8, r9, r10, r11, r12, lr}
+ 733              	
+ 734              	    @Loading the half-lanes of share 1 into the group A registers
+ 735              	    ldr     r3, [r0, #\memAya]
+ 736              	    ldr     r4, [r0, #\memAye]
+ 737              	    ldr     r5, [r0, #\memAyi]
+ 738              	    ldr     r6, [r0, #\memAyo]
+ 739              	    ldr     r7, [r0, #\memAyu]
+ 740              	
+ 741              	    @ Applying diffusion values to the lanes of share 1
+ 742              	    eors    r3, r3, \Dya
+ 743              	    eors    r4, r4, \Dye
+ 744              	    eors    r5, r5, \Dyi
+ 745              	    eors    r6, r6, \Dyo
+ 746              	    eors    r7, r7, \Dyu
+ 747              	
+ 748              	    @ Applying rotations of the Rho step to the half-lanes of share 1
+ 749              	    .if  \rotAye > 0
+ 750              	        rors    r4, #32-\rotAye
+ 751              	    .endif
+ 752              	    rors    r5, #32-\rotAyi
+ 753              	    rors    r6, #32-\rotAyo
+ 754              	    rors    r7, #32-\rotAyu
+ 755              	
+ 756              	    @ Storing half-lanes of the share 1 after applying Theta+Rho
+ 757              	    str r3, [r0, #\memAya]
+ 758              	    str r4, [r0, #\memAye]
+ 759              	    str r5, [r0, #\memAyi]
+ 760              	    str r6, [r0, #\memAyo]
+ 761              	    str r7, [r0, #\memAyu]
+ 762              	
+ 763              	
+ 764              	
+ 765              	    @THETA+RHO APPLIED TO S2 
+ 766              	    @Loading the half-lanes of share 2 into the group B registers 
+ 767              	    @Loading the diffusion values for the half-lanes of share 2 into the auxiliar registers r1, r2,
+ 768              	    @Applying diffusion values to the half lanes of share 2  
+ 769              	    
+ 770              	    ldr     r8, [r0, #\memAya+200]
+ 771              	    ldr     r1, [r0, #\memDya+40]
+ 772              	    ldr     r9, [r0, #\memAye+200]
+ 773              	    ldr     r2, [r0, #\memDye+40]
+ 774              	    ldr     r10, [r0, #\memAyi+200]
+ 775              	    ldr     lr, [r0, #\memDyi+40]
+ 776              	
+ 777              	    eors    r8, r8, r1
+ 778              	    eors    r9, r9, r2
+ 779              	    eors    r10, r10, lr
+ 780              	
+ 781              	    ldr     r11, [r0, #\memAyo+200]
+ 782              	    ldr     r1, [r0, #\memDyo+40]
+ 783              	    ldr     r12, [r0, #\memAyu+200]
+ 784              	    ldr     lr, [r0, #\memDyu+40]
+ 785              	    
+ 786              	    eors    r11, r11, r1
+ 787              	    eors    r12, r12, lr
+ 788              	
+ 789              	    @ Applying rotations of the Rho step to the half-lanes of share 2     
+ 790              	    .if  \rotAye > 0
+ 791              	        rors    r9, #32-\rotAye
+ 792              	    .endif
+ 793              	    rors    r10, #32-\rotAyi
+ 794              	    rors    r11, #32-\rotAyo
+ 795              	    rors    r12, #32-\rotAyu
+ 796              	
+ 797              	
+ 798              	
+ 799              	
+ 800              	    @PI+CHI APPLIED TO SHARE 0 (SHARES 1 - 2)
+ 801              	
+ 802              	    @At this point, the register values are:
+ 803              	    @   - r3-r7: half-lanes of the share 1 with Theta and Rho steps applied (Group A)
+ 804              	    @   - r8-r12: half-lanes of the share 2 with Theta and Rho steps applied (Group B)
+ 805              	
+ 806              	    @The following expansions of OpChi macro computes the output share Y_0 from input shares
+ 807              	    @X_1, X_2 and write them in the corresponding memory address according to in-place processing
+ 808              	    @(it will be one of the other positions in the diagonal, but not the same)
+ 809              	
+ 810              	    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read
+ 811              	    .if     \memAya < 599
+ 812              	        OpChi   #\memAya+400, r9, r10, r3, r4, r5
+ 813              	        OpChi   #\memAye+400, r10, r11, r4, r5, r6
+ 814              	        OpChi   #\memAyi+400, r11, r12, r5, r6, r7
+ 815              	        OpChi   #\memAyo+400, r12, r8, r6, r7, r3
+ 816              	        OpChi   #\memAyu+400, r8, r9, r7, r3, r4
+ 817              	    .else 
+ 818              	        OpChi   #\memAya-800, r9, r10, r3, r4, r5
+ 819              	        OpChi   #\memAye-800, r10, r11, r4, r5, r6
+ 820              	        OpChi   #\memAyi-800, r11, r12, r5, r6, r7
+ 821              	        OpChi   #\memAyo-800, r12, r8, r6, r7, r3
+ 822              	        OpChi   #\memAyu-800, r8, r9, r7, r3, r4
+ 823              	    .endif
+ 824              	
+ 825              	
+ 826              	
+ 827              	
+ 828              	    @THETA+RHO APPLIED TO S0. Stack at this point (old --> new): r8-r12: Diffusions, r3-r7: SHARE 1
+ 829              	
+ 830              	    @Loading the half-lanes of share 0 into the group A of registers 
+ 831              	    @Loading the diffusion values for the half-lanes of share 2 into the auxiliar registers r1, r2,
+ 832              	    @Applying diffusion values to the half lanes of share 2
+ 833              	
+ 834              	    ldr     r3, [r0, #\memAya-200]
+ 835              	    ldr     r1, [r0, #\memDya-40]
+ 836              	    ldr     r4, [r0, #\memAye-200]
+ 837              	    ldr     r2, [r0, #\memDye-40]
+ 838              	    ldr     r5, [r0, #\memAyi-200]
+ 839              	    ldr     lr, [r0, #\memDyi-40]
+ 840              	
+ 841              	    eors    r3, r3, r1
+ 842              	    eors    r4, r4, r2
+ 843              	    eors    r5, r5, lr
+ 844              	
+ 845              	
+ 846              	    ldr     r6, [r0, #\memAyo-200]
+ 847              	    ldr     r1, [r0, #\memDyo-40]
+ 848              	    ldr     r7, [r0, #\memAyu-200]
+ 849              	    ldr     lr, [r0, #\memDyu-40]
+ 850              	    
+ 851              	    eors    r6, r6, r1
+ 852              	    eors    r7, r7, lr
+ 853              	
+ 854              	    @ Applying rotations of the Rho step to the half-lanes of share 2
+ 855              	    .if  \rotAye > 0
+ 856              	        rors    r4, #32-\rotAye
+ 857              	    .endif
+ 858              	    rors    r5, #32-\rotAyi
+ 859              	    rors    r6, #32-\rotAyo
+ 860              	    rors    r7, #32-\rotAyu
+ 861              	
+ 862              	
+ 863              	
+ 864              	
+ 865              	    @PI+CHI APPLIED TO SHARE 1 (SHARES 2 - 0)
+ 866              	    @At this point, the register values are:
+ 867              	    @   - r3-r7: half-lanes of the share 0 with Theta and Rho steps applied (Group A)
+ 868              	    @   - r8-r12: half-lanes of the share 2 with Theta and Rho steps applied (Group B)
+ 869              	    @The following expansions of OpChi macro computes the output share Y_1 from input shares
+ 870              	    @X_2, X_0 and write them in the corresponding memory address according to in-place processing
+ 871              	    @(it will be one of the other positions in the diagonal, but not the same)
+ 872              	    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read
+ 873              	
+ 874              	    .if     \memAya < 599
+ 875              	        OpChi   #\memAya+600, r4, r5, r8, r9, r10
+ 876              	        OpChi   #\memAye+600, r5, r6, r9, r10, r11
+ 877              	        OpChi   #\memAyi+600, r6, r7, r10, r11, r12
+ 878              	        OpChi   #\memAyo+600, r7, r3, r11, r12, r8
+ 879              	        OpChi   #\memAyu+600, r3, r4, r12, r8, r9
+ 880              	    .else 
+ 881              	        OpChi   #\memAya-600, r4, r5, r8, r9, r10
+ 882              	        OpChi   #\memAye-600, r5, r6, r9, r10, r11
+ 883              	        OpChi   #\memAyi-600, r6, r7, r10, r11, r12
+ 884              	        OpChi   #\memAyo-600, r7, r3, r11, r12, r8
+ 885              	        OpChi   #\memAyu-600, r3, r4, r12, r8, r9
+ 886              	    .endif
+ 887              	
+ 888              	
+ 889              	
+ 890              	    @PI+CHI APPLIED TO SHARE 2 (SHARES 0 - 1).
+ 891              	    @Loading the half-lanes of share 1 (Theta+Rho already applied) into the group B of registers
+ 892              	
+ 893              	    ldr     r8, [r0, #\memAya]
+ 894              	    ldr     r9, [r0, #\memAye]
+ 895              	    ldr     r10, [r0, #\memAyi]
+ 896              	    ldr     r11, [r0, #\memAyo]
+ 897              	    ldr     r12, [r0, #\memAyu]
+ 898              	
+ 899              	    @If we read from memory zone A, we write in the corresponding memory zone B. Else, we have read
+ 900              	    .if     \memAya < 599
+ 901              	        OpChi   #\memAye+800, r10, r11, r4, r5, r6
+ 902              	        OpChi   #\memAyi+800, r11, r12, r5, r6, r7
+ 903              	        OpChi   #\memAyo+800, r12, r8, r6, r7, r3
+ 904              	        OpChi   #\memAyu+800, r8, r9, r7, r3, r4
+ 905              	    .else 
+ 906              	        OpChi   #\memAye-400, r10, r11, r4, r5, r6
+ 907              	        OpChi   #\memAyi-400, r11, r12, r5, r6, r7
+ 908              	        OpChi   #\memAyo-400, r12, r8, r6, r7, r3
+ 909              	        OpChi   #\memAyu-400, r8, r9, r7, r3, r4
+ 910              	    .endif
+ 911              	
+ 912              	    @Loading the address where the Round Constants table starts
+ 913              	    ldr     r1, [r0, #mRC]
+ 914              	
+ 915              	    @Chi step applied to lane (0,0)
+ 916              	    eors r6, r3, r5
+ 917              	    and r7, r4, r5
+ 918              	    eors r6, r6, r7
+ 919              	    and r7, r4, r10
+ 920              	    eors r6, r6, r7
+ 921              	    and r7, r9, r5
+ 922              	    eors r6, r6, r7  
+ 923              	
+ 924              	    @Loading the Round Constant of Iota step applying the input offset to the memory address where 
+ 925              	    ldr     r4, [r1, #\offset]
+ 926              	
+ 927              	    @Lane(0,0) XOR RoundConstant 
+ 928              	    eors r6, r6, r4
+ 929              	
+ 930              	    .if  \last == 1
+ 931              	    ldr     r4, [r1, #32]!
+ 932              	    str     r1, [r0, #mRC]
+ 933              	    cmp     r4, #0xFF
+ 934              	    .endif
+ 935              	
+ 936              	    @Writing-back the lane (0,0) after applying Iota step in the writing memory zone
+ 937              	    .if     \memAya <599
+ 938              	        str     r6, [r0, #\memAya+800]
+ 939              	    .else
+ 940              	        str     r6, [r0, #\memAya-400]
+ 941              	    .endif
+ 942              	
+ 943              	
+ 944              	    pop {r2, r8, r9, r10, r11, r12, lr}
+ 945              	.endm
+ 946              	
+ 947              	
+ 948              	
+ 949              	@----------------------------------------------------------------------------------
+ 950              	@------------------------------------KECCAKROUND0 MACRO----------------------------
+ 951              	@----------------------------------------------------------------------------------
+ 952              	@This macro performs the first cyclic round of Keccak
+ 953              	@----------------------------------------------------------------------------------
+ 954              	
+ 955              	.macro    KeccakRound0
+ 956              	
+ 957              	    @DIFFUSION SHARE 0
+ 958              	    xor5        r3,  Abu0_s0, Agu0_s0, Aku0_s0, Amu0_s0, Asu0_s0
+ 959              	    xor5        r7, Abe1_s0, Age1_s0, Ake1_s0, Ame1_s0, Ase1_s0
+ 960              	    xorrol      r6, r3, r7
+ 961              	    str         r6, [r0, #mDa0_s0]
+ 962              	    xor5        r6,  Abu1_s0, Agu1_s0, Aku1_s0, Amu1_s0, Asu1_s0
+ 963              	    xor5        lr, Abe0_s0, Age0_s0, Ake0_s0, Ame0_s0, Ase0_s0
+ 964              	    eors        r8, r6, lr
+ 965              	    str         r8, [r0, #mDa1_s0]
+ 966              	
+ 967              	    xor5        r5,  Abi0_s0, Agi0_s0, Aki0_s0, Ami0_s0, Asi0_s0
+ 968              	    xorrol      r9, r5, r6
+ 969              	    str         r9, [r0, #mDo0_s0]
+ 970              	    xor5        r4,  Abi1_s0, Agi1_s0, Aki1_s0, Ami1_s0, Asi1_s0
+ 971              	    eors        r3, r3, r4
+ 972              	    str         r3, [r0, #mDo1_s0]
+ 973              	
+ 974              	    xor5        r3,  Aba0_s0, Aga0_s0, Aka0_s0, Ama0_s0, Asa0_s0
+ 975              	    xorrol      r10, r3, r4
+ 976              	    str         r10, [r0, #mDe0_s0]
+ 977              	    xor5        r6,  Aba1_s0, Aga1_s0, Aka1_s0, Ama1_s0, Asa1_s0
+ 978              	    eors        r11, r6, r5
+ 979              	    str         r11, [r0, #mDe1_s0]
+ 980              	
+ 981              	    xor5        r4,  Abo1_s0, Ago1_s0, Ako1_s0, Amo1_s0, Aso1_s0
+ 982              	    xorrol      r5, lr, r4
+ 983              	    str         r5, [r0, #mDi0_s0]
+ 984              	    xor5        r5,  Abo0_s0, Ago0_s0, Ako0_s0, Amo0_s0, Aso0_s0
+ 985              	    eors        r2, r7, r5
+ 986              	    str         r2, [r0, #mDi1_s0]
+ 987              	
+ 988              	    xorrol      r12, r5, r6
+ 989              	    str         r12, [r0, #mDu0_s0]
+ 990              	    eors        lr, r4, r3
+ 991              	    str         lr, [r0, #mDu1_s0]
+ 992              	
+ 993              	    @DIFFUSION SHARE 2
+ 994              	    xor5        r3,  Abu0_s2, Agu0_s2, Aku0_s2, Amu0_s2, Asu0_s2
+ 995              	    xor5        r7, Abe1_s2, Age1_s2, Ake1_s2, Ame1_s2, Ase1_s2
+ 996              	    xorrol      r6, r3, r7
+ 997              	    str         r6, [r0, #mDa0_s2]
+ 998              	    xor5        r6,  Abu1_s2, Agu1_s2, Aku1_s2, Amu1_s2, Asu1_s2
+ 999              	    xor5        lr, Abe0_s2, Age0_s2, Ake0_s2, Ame0_s2, Ase0_s2
+ 1000              	    eors        r8, r6, lr
+ 1001              	    str         r8, [r0, #mDa1_s2]
+ 1002              	
+ 1003              	    xor5        r5,  Abi0_s2, Agi0_s2, Aki0_s2, Ami0_s2, Asi0_s2
+ 1004              	    xorrol      r9, r5, r6
+ 1005              	    str         r9, [r0, #mDo0_s2]
+ 1006              	    xor5        r4,  Abi1_s2, Agi1_s2, Aki1_s2, Ami1_s2, Asi1_s2
+ 1007              	    eors        r3, r3, r4
+ 1008              	    str         r3, [r0, #mDo1_s2]
+ 1009              	
+ 1010              	    xor5        r3,  Aba0_s2, Aga0_s2, Aka0_s2, Ama0_s2, Asa0_s2
+ 1011              	    xorrol      r10, r3, r4
+ 1012              	    str         r10, [r0, #mDe0_s2]
+ 1013              	    xor5        r6,  Aba1_s2, Aga1_s2, Aka1_s2, Ama1_s2, Asa1_s2
+ 1014              	    eors        r11, r6, r5
+ 1015              	    str         r11, [r0, #mDe1_s2]
+ 1016              	
+ 1017              	    xor5        r4,  Abo1_s2, Ago1_s2, Ako1_s2, Amo1_s2, Aso1_s2
+ 1018              	    xorrol      r5, lr, r4
+ 1019              	    str         r5, [r0, #mDi0_s2]
+ 1020              	    xor5        r5,  Abo0_s2, Ago0_s2, Ako0_s2, Amo0_s2, Aso0_s2
+ 1021              	    eors        r2, r7, r5
+ 1022              	    str         r2, [r0, #mDi1_s2]
+ 1023              	
+ 1024              	    xorrol      r12, r5, r6
+ 1025              	    str         r12, [r0, #mDu0_s2]
+ 1026              	    eors        lr, r4, r3
+ 1027              	    str         lr, [r0, #mDu1_s2]
+ 1028              	
+ 1029              	    @DIFFUSION SHARE 1
+ 1030              	    xor5        r3,  Abu0_s1, Agu0_s1, Aku0_s1, Amu0_s1, Asu0_s1
+ 1031              	    xor5        r7, Abe1_s1, Age1_s1, Ake1_s1, Ame1_s1, Ase1_s1
+ 1032              	    xorrol      r6, r3, r7
+ 1033              	    str         r6, [r0, #mDa0_s1]
+ 1034              	    xor5        r6,  Abu1_s1, Agu1_s1, Aku1_s1, Amu1_s1, Asu1_s1
+ 1035              	    xor5        lr, Abe0_s1, Age0_s1, Ake0_s1, Ame0_s1, Ase0_s1
+ 1036              	    eors        r8, r6, lr
+ 1037              	    str         r8, [r0, #mDa1_s1]
+ 1038              	
+ 1039              	    xor5        r5,  Abi0_s1, Agi0_s1, Aki0_s1, Ami0_s1, Asi0_s1
+ 1040              	    xorrol      r9, r5, r6
+ 1041              	    str         r9, [r0, #mDo0_s1]
+ 1042              	    xor5        r4,  Abi1_s1, Agi1_s1, Aki1_s1, Ami1_s1, Asi1_s1
+ 1043              	    eors        r3, r3, r4
+ 1044              	    str         r3, [r0, #mDo1_s1]
+ 1045              	
+ 1046              	    xor5        r3,  Aba0_s1, Aga0_s1, Aka0_s1, Ama0_s1, Asa0_s1
+ 1047              	    xorrol      r10, r3, r4
+ 1048              	    str         r10, [r0, #mDe0_s1]
+ 1049              	    xor5        r6,  Aba1_s1, Aga1_s1, Aka1_s1, Ama1_s1, Asa1_s1
+ 1050              	    eors        r11, r6, r5
+ 1051              	    str         r11, [r0, #mDe1_s1]
+ 1052              	
+ 1053              	    xor5        r4,  Abo1_s1, Ago1_s1, Ako1_s1, Amo1_s1, Aso1_s1
+ 1054              	    xorrol      r5, lr, r4
+ 1055              	    str         r5, [r0, #mDi0_s1]
+ 1056              	    xor5        r5,  Abo0_s1, Ago0_s1, Ako0_s1, Amo0_s1, Aso0_s1
+ 1057              	    eors        r2, r7, r5
+ 1058              	    str         r2, [r0, #mDi1_s1]
+ 1059              	
+ 1060              	    xorrol      r12, r5, r6
+ 1061              	    str         r12, [r0, #mDu0_s1]
+ 1062              	    eors        lr, r4, r3
+ 1063              	    str         lr, [r0, #mDu1_s1]
+ 1064              	
+ 1065              	
+ 1066              	
+ 1067              	    KeccakThetaRhoPiChi r5, Aka1_s1, r8,  2, r6, Ame1_s1, r11, 23, r7, Asi1_s1, r2, 31, r3, Abo0_s1
+ 1068              	    KeccakThetaRhoPiChi r7, Asa1_s1, r8,  9, r3, Abe0_s1, r10,  0, r4, Agi1_s1, r2,  3, r5, Ako0_s1
+ 1069              	    ldr         r8, [r0, #mDa0_s1]
+ 1070              	    KeccakThetaRhoPiChi r4, Aga0_s1, r8, 18, r5, Ake0_s1, r10,  5, r6, Ami1_s1, r2,  8, r7, Aso0_s1
+ 1071              	    KeccakThetaRhoPiChi r6, Ama0_s1, r8, 20, r7, Ase1_s1, r11,  1, r3, Abi1_s1, r2, 31, r4, Ago0_s1
+ 1072              	    ldr         r9, [r0, #mDo1_s1]
+ 1073              	    KeccakThetaRhoPiChiIota  Aba0_s1, r8,          Age0_s1, r10, 22,      Aki1_s1, r2, 22,      Amo
+ 1074              	
+ 1075              	    ldr         r2, [r0, #mDi0_s1]
+ 1076              	    KeccakThetaRhoPiChi r5, Aka0_s1, r8,  1, r6, Ame0_s1, r10, 22, r7, Asi0_s1, r2, 30, r3, Abo1_s1
+ 1077              	    KeccakThetaRhoPiChi r7, Asa0_s1, r8,  9, r3, Abe1_s1, r11,  1, r4, Agi0_s1, r2,  3, r5, Ako1_s1
+ 1078              	    ldr         r8, [r0, #mDa1_s1]
+ 1079              	    KeccakThetaRhoPiChi r4, Aga1_s1, r8, 18, r5, Ake1_s1, r11,  5, r6, Ami0_s1, r2,  7, r7, Aso1_s1
+ 1080              	    KeccakThetaRhoPiChi r6, Ama1_s1, r8, 21, r7, Ase0_s1, r10,  1, r3, Abi0_s1, r2, 31, r4, Ago1_s1
+ 1081              	    ldr         r9, [r0, #mDo0_s1]
+ 1082              	    KeccakThetaRhoPiChiIota  Aba1_s1, r8,          Age1_s1, r11, 22,      Aki0_s1, r2, 21,      Amo
+ 1083              	.endm
+ 1084              	
+ 1085              	
+ 1086              	@----------------------------------------------------------------------------------
+ 1087              	@------------------------------------KECCAKROUND1 MACRO----------------------------
+ 1088              	@----------------------------------------------------------------------------------
+ 1089              	@This macro performs the second cyclic round of Keccak
+ 1090              	@----------------------------------------------------------------------------------
+ 1091              	
+ 1092              	
+ 1093              	.macro    KeccakRound1
+ 1094              	    @DIFFUSION SHARE 0
+ 1095              	    xor5        r3,  Asu0_s0_M2, Agu0_s0_M2, Amu0_s0_M2, Abu1_s0_M2, Aku1_s0_M2
+ 1096              	    xor5        r7,  Age1_s0_M2, Ame0_s0_M2, Abe0_s0_M2, Ake1_s0_M2, Ase1_s0_M2
+ 1097              	    xorrol      r6, r3, r7
+ 1098              	    str         r6, [r0, #mDa0_s0]
+ 1099              	    xor5        r6,  Asu1_s0_M2, Agu1_s0_M2, Amu1_s0_M2, Abu0_s0_M2, Aku0_s0_M2
+ 1100              	    xor5        lr,  Age0_s0_M2, Ame1_s0_M2, Abe1_s0_M2, Ake0_s0_M2, Ase0_s0_M2
+ 1101              	    eors        r8, r6, lr
+ 1102              	    str         r8, [r0, #mDa1_s0]
+ 1103              	
+ 1104              	    xor5        r5,  Aki1_s0_M2, Asi1_s0_M2, Agi0_s0_M2, Ami1_s0_M2, Abi0_s0_M2
+ 1105              	    xorrol      r9, r5, r6
+ 1106              	    str         r9, [r0, #mDo0_s0]
+ 1107              	    xor5        r4,  Aki0_s0_M2, Asi0_s0_M2, Agi1_s0_M2, Ami0_s0_M2, Abi1_s0_M2
+ 1108              	    eors        r3, r3, r4
+ 1109              	    str         r3, [r0, #mDo1_s0]
+ 1110              	
+ 1111              	    xor5        r3,  Aba0_s0_M2, Aka1_s0_M2, Asa0_s0_M2, Aga0_s0_M2, Ama1_s0_M2
+ 1112              	    xorrol      r10, r3, r4
+ 1113              	    str         r10, [r0, #mDe0_s0]
+ 1114              	    xor5        r6,  Aba1_s0_M2, Aka0_s0_M2, Asa1_s0_M2, Aga1_s0_M2, Ama0_s0_M2
+ 1115              	    eors        r11, r6, r5
+ 1116              	    str         r11, [r0, #mDe1_s0]
+ 1117              	
+ 1118              	    xor5        r4,  Amo0_s0_M2, Abo1_s0_M2, Ako0_s0_M2, Aso1_s0_M2, Ago0_s0_M2
+ 1119              	    xorrol      r5, lr, r4
+ 1120              	    str         r5, [r0, #mDi0_s0]
+ 1121              	    xor5        r5,  Amo1_s0_M2, Abo0_s0_M2, Ako1_s0_M2, Aso0_s0_M2, Ago1_s0_M2
+ 1122              	    eors        r2, r7, r5
+ 1123              	    str         r2, [r0, #mDi1_s0]
+ 1124              	
+ 1125              	    xorrol      r12, r5, r6
+ 1126              	    str         r12, [r0, #mDu0_s0]
+ 1127              	    eors        lr, r4, r3
+ 1128              	    str         lr, [r0, #mDu1_s0]
+ 1129              	
+ 1130              	
+ 1131              	
+ 1132              	    @DIFFUSION SHARE 2
+ 1133              	    xor5        r3,  Asu0_s2_M2, Agu0_s2_M2, Amu0_s2_M2, Abu1_s2_M2, Aku1_s2_M2
+ 1134              	    xor5        r7,  Age1_s2_M2, Ame0_s2_M2, Abe0_s2_M2, Ake1_s2_M2, Ase1_s2_M2
+ 1135              	    xorrol      r6, r3, r7
+ 1136              	    str         r6, [r0, #mDa0_s2]
+ 1137              	    xor5        r6,  Asu1_s2_M2, Agu1_s2_M2, Amu1_s2_M2, Abu0_s2_M2, Aku0_s2_M2
+ 1138              	    xor5        lr,  Age0_s2_M2, Ame1_s2_M2, Abe1_s2_M2, Ake0_s2_M2, Ase0_s2_M2
+ 1139              	    eors        r8, r6, lr
+ 1140              	    str         r8, [r0, #mDa1_s2]
+ 1141              	
+ 1142              	    xor5        r5,  Aki1_s2_M2, Asi1_s2_M2, Agi0_s2_M2, Ami1_s2_M2, Abi0_s2_M2
+ 1143              	    xorrol      r9, r5, r6
+ 1144              	    str         r9, [r0, #mDo0_s2]
+ 1145              	    xor5        r4,  Aki0_s2_M2, Asi0_s2_M2, Agi1_s2_M2, Ami0_s2_M2, Abi1_s2_M2
+ 1146              	    eors        r3, r3, r4
+ 1147              	    str         r3, [r0, #mDo1_s2]
+ 1148              	
+ 1149              	    xor5        r3,  Aba0_s2_M2, Aka1_s2_M2, Asa0_s2_M2, Aga0_s2_M2, Ama1_s2_M2
+ 1150              	    xorrol      r10, r3, r4
+ 1151              	    str         r10, [r0, #mDe0_s2]
+ 1152              	    xor5        r6,  Aba1_s2_M2, Aka0_s2_M2, Asa1_s2_M2, Aga1_s2_M2, Ama0_s2_M2
+ 1153              	    eors        r11, r6, r5
+ 1154              	    str         r11, [r0, #mDe1_s2]
+ 1155              	
+ 1156              	    xor5        r4,  Amo0_s2_M2, Abo1_s2_M2, Ako0_s2_M2, Aso1_s2_M2, Ago0_s2_M2
+ 1157              	    xorrol      r5, lr, r4
+ 1158              	    str         r5, [r0, #mDi0_s2]
+ 1159              	    xor5        r5,  Amo1_s2_M2, Abo0_s2_M2, Ako1_s2_M2, Aso0_s2_M2, Ago1_s2_M2
+ 1160              	    eors        r2, r7, r5
+ 1161              	    str         r2, [r0, #mDi1_s2]
+ 1162              	
+ 1163              	    xorrol      r12, r5, r6
+ 1164              	    str         r12, [r0, #mDu0_s2]
+ 1165              	    eors        lr, r4, r3
+ 1166              	    str         lr, [r0, #mDu1_s2]
+ 1167              	
+ 1168              	    @DIFFUSION SHARE 1
+ 1169              	    xor5        r3,  Asu0_s1_M2, Agu0_s1_M2, Amu0_s1_M2, Abu1_s1_M2, Aku1_s1_M2
+ 1170              	    xor5        r7,  Age1_s1_M2, Ame0_s1_M2, Abe0_s1_M2, Ake1_s1_M2, Ase1_s1_M2
+ 1171              	    xorrol      r6, r3, r7
+ 1172              	    str         r6, [r0, #mDa0_s1]
+ 1173              	    xor5        r6,  Asu1_s1_M2, Agu1_s1_M2, Amu1_s1_M2, Abu0_s1_M2, Aku0_s1_M2
+ 1174              	    xor5        lr,  Age0_s1_M2, Ame1_s1_M2, Abe1_s1_M2, Ake0_s1_M2, Ase0_s1_M2
+ 1175              	    eors        r8, r6, lr
+ 1176              	    str         r8, [r0, #mDa1_s1]
+ 1177              	
+ 1178              	    xor5        r5,  Aki1_s1_M2, Asi1_s1_M2, Agi0_s1_M2, Ami1_s1_M2, Abi0_s1_M2
+ 1179              	    xorrol      r9, r5, r6
+ 1180              	    str         r9, [r0, #mDo0_s1]
+ 1181              	    xor5        r4,  Aki0_s1_M2, Asi0_s1_M2, Agi1_s1_M2, Ami0_s1_M2, Abi1_s1_M2
+ 1182              	    eors        r3, r3, r4
+ 1183              	    str         r3, [r0, #mDo1_s1]
+ 1184              	
+ 1185              	    xor5        r3,  Aba0_s1_M2, Aka1_s1_M2, Asa0_s1_M2, Aga0_s1_M2, Ama1_s1_M2
+ 1186              	    xorrol      r10, r3, r4
+ 1187              	    str         r10, [r0, #mDe0_s1]
+ 1188              	    xor5        r6,  Aba1_s1_M2, Aka0_s1_M2, Asa1_s1_M2, Aga1_s1_M2, Ama0_s1_M2
+ 1189              	    eors        r11, r6, r5
+ 1190              	    str         r11, [r0, #mDe1_s1]
+ 1191              	
+ 1192              	    xor5        r4,  Amo0_s1_M2, Abo1_s1_M2, Ako0_s1_M2, Aso1_s1_M2, Ago0_s1_M2
+ 1193              	    xorrol      r5, lr, r4
+ 1194              	    str         r5, [r0, #mDi0_s1]
+ 1195              	    xor5        r5,  Amo1_s1_M2, Abo0_s1_M2, Ako1_s1_M2, Aso0_s1_M2, Ago1_s1_M2
+ 1196              	    eors        r2, r7, r5
+ 1197              	    str         r2, [r0, #mDi1_s1]
+ 1198              	
+ 1199              	    xorrol      r12, r5, r6
+ 1200              	    str         r12, [r0, #mDu0_s1]
+ 1201              	    eors        lr, r4, r3
+ 1202              	    str         lr, [r0, #mDu1_s1]
+ 1203              	
+ 1204              	
+ 1205              	    KeccakThetaRhoPiChi r5, Asa1_s1_M2, r8,  2, r6, Ake1_s1_M2, r11, 23, r7, Abi1_s1_M2, r2, 31, r3
+ 1206              	    KeccakThetaRhoPiChi r7, Ama0_s1_M2, r8,  9, r3, Age0_s1_M2, r10,  0, r4, Asi0_s1_M2, r2,  3, r5
+ 1207              	    ldr         r8, [r0, #mDa0_s1]
+ 1208              	    KeccakThetaRhoPiChi r4, Aka1_s1_M2, r8, 18, r5, Abe1_s1_M2, r10,  5, r6, Ami0_s1_M2, r2,  8, r7
+ 1209              	    KeccakThetaRhoPiChi r6, Aga0_s1_M2, r8, 20, r7, Ase1_s1_M2, r11,  1, r3, Aki0_s1_M2, r2, 31, r4
+ 1210              	    ldr         r9, [r0, #mDo1_s1]
+ 1211              	    KeccakThetaRhoPiChiIota  Aba0_s1_M2, r8,          Ame1_s1_M2, r10, 22,      Agi1_s1_M2, r2, 22,
+ 1212              	
+ 1213              	    ldr         r2, [r0, #mDi0_s1]
+ 1214              	    KeccakThetaRhoPiChi r5, Asa0_s1_M2, r8,  1, r6, Ake0_s1_M2, r10, 22, r7, Abi0_s1_M2, r2, 30, r3
+ 1215              	    KeccakThetaRhoPiChi r7, Ama1_s1_M2, r8,  9, r3, Age1_s1_M2, r11,  1, r4, Asi1_s1_M2, r2,  3, r5
+ 1216              	    ldr         r8, [r0, #mDa1_s1]
+ 1217              	    KeccakThetaRhoPiChi r4, Aka0_s1_M2, r8, 18, r5, Abe0_s1_M2, r11,  5, r6, Ami1_s1_M2, r2,  7, r7
+ 1218              	    KeccakThetaRhoPiChi r6, Aga1_s1_M2, r8, 21, r7, Ase0_s1_M2, r10,  1, r3, Aki1_s1_M2, r2, 31, r4
+ 1219              	    ldr         r9, [r0, #mDo0_s1]
+ 1220              	    KeccakThetaRhoPiChiIota  Aba1_s1_M2, r8,          Ame0_s1_M2, r11, 22,      Agi0_s1_M2, r2, 21,
+ 1221              	
+ 1222              	.endm
+ 1223              	
+ 1224              	
+ 1225              	@----------------------------------------------------------------------------------
+ 1226              	@------------------------------------KECCAKROUND2 MACRO----------------------------
+ 1227              	@----------------------------------------------------------------------------------
+ 1228              	@This macro performs the third cyclic round of Keccak
+ 1229              	@----------------------------------------------------------------------------------
+ 1230              	
+ 1231              	.macro KeccakRound2
+ 1232              	    @DIFFUSION SHARE 0
+ 1233              	    xor5        r3, Aku1_s0, Agu0_s0, Abu1_s0, Asu1_s0, Amu1_s0
+ 1234              	    xor5        r7, Ame0_s0, Ake0_s0, Age0_s0, Abe0_s0, Ase1_s0
+ 1235              	    xorrol      r6, r3, r7
+ 1236              	    str         r6, [r0, #mDa0_s0]
+ 1237              	    xor5        r6,  Aku0_s0, Agu1_s0, Abu0_s0, Asu0_s0, Amu0_s0
+ 1238              	    xor5        lr, Ame1_s0, Ake1_s0, Age1_s0, Abe1_s0, Ase0_s0
+ 1239              	    eors        r8, r6, lr
+ 1240              	    str         r8, [r0, #mDa1_s0]
+ 1241              	
+ 1242              	    xor5        r5,  Agi1_s0, Abi1_s0, Asi1_s0, Ami0_s0, Aki1_s0
+ 1243              	    xorrol      r9, r5, r6
+ 1244              	    str         r9, [r0, #mDo0_s0]
+ 1245              	    xor5        r4,  Agi0_s0, Abi0_s0, Asi0_s0, Ami1_s0, Aki0_s0
+ 1246              	    eors        r3, r3, r4
+ 1247              	    str         r3, [r0, #mDo1_s0]
+ 1248              	
+ 1249              	    xor5        r3,  Aba0_s0, Asa1_s0, Ama1_s0, Aka1_s0, Aga1_s0
+ 1250              	    xorrol      r10, r3, r4
+ 1251              	    str         r10, [r0, #mDe0_s0]
+ 1252              	    xor5        r6,  Aba1_s0, Asa0_s0, Ama0_s0, Aka0_s0, Aga0_s0
+ 1253              	    eors        r11, r6, r5
+ 1254              	    str         r11, [r0, #mDe1_s0]
+ 1255              	
+ 1256              	    xor5        r4,  Aso0_s0, Amo0_s0, Ako1_s0, Ago0_s0, Abo0_s0
+ 1257              	    xorrol      r5, lr, r4
+ 1258              	    str         r5, [r0, #mDi0_s0]
+ 1259              	    xor5        r5,  Aso1_s0, Amo1_s0, Ako0_s0, Ago1_s0, Abo1_s0
+ 1260              	    eors        r2, r7, r5
+ 1261              	    str         r2, [r0, #mDi1_s0]
+ 1262              	
+ 1263              	    xorrol      r12, r5, r6
+ 1264              	    str         r12, [r0, #mDu0_s0]
+ 1265              	    eors        lr, r4, r3
+ 1266              	    str         lr, [r0, #mDu1_s0]
+ 1267              	
+ 1268              	
+ 1269              	    @DIFFUSION SHARE 2
+ 1270              	    xor5        r3, Aku1_s2, Agu0_s2, Abu1_s2, Asu1_s2, Amu1_s2
+ 1271              	    xor5        r7, Ame0_s2, Ake0_s2, Age0_s2, Abe0_s2, Ase1_s2
+ 1272              	    xorrol      r6, r3, r7
+ 1273              	    str         r6, [r0, #mDa0_s2]
+ 1274              	    xor5        r6,  Aku0_s2, Agu1_s2, Abu0_s2, Asu0_s2, Amu0_s2
+ 1275              	    xor5        lr, Ame1_s2, Ake1_s2, Age1_s2, Abe1_s2, Ase0_s2
+ 1276              	    eors        r8, r6, lr
+ 1277              	    str         r8, [r0, #mDa1_s2]
+ 1278              	
+ 1279              	    xor5        r5,  Agi1_s2, Abi1_s2, Asi1_s2, Ami0_s2, Aki1_s2
+ 1280              	    xorrol      r9, r5, r6
+ 1281              	    str         r9, [r0, #mDo0_s2]
+ 1282              	    xor5        r4,  Agi0_s2, Abi0_s2, Asi0_s2, Ami1_s2, Aki0_s2
+ 1283              	    eors        r3, r3, r4
+ 1284              	    str         r3, [r0, #mDo1_s2]
+ 1285              	
+ 1286              	    xor5        r3,  Aba0_s2, Asa1_s2, Ama1_s2, Aka1_s2, Aga1_s2
+ 1287              	    xorrol      r10, r3, r4
+ 1288              	    str         r10, [r0, #mDe0_s2]
+ 1289              	    xor5        r6,  Aba1_s2, Asa0_s2, Ama0_s2, Aka0_s2, Aga0_s2
+ 1290              	    eors        r11, r6, r5
+ 1291              	    str         r11, [r0, #mDe1_s2]
+ 1292              	
+ 1293              	    xor5        r4,  Aso0_s2, Amo0_s2, Ako1_s2, Ago0_s2, Abo0_s2
+ 1294              	    xorrol      r5, lr, r4
+ 1295              	    str         r5, [r0, #mDi0_s2]
+ 1296              	    xor5        r5,  Aso1_s2, Amo1_s2, Ako0_s2, Ago1_s2, Abo1_s2
+ 1297              	    eors        r2, r7, r5
+ 1298              	    str         r2, [r0, #mDi1_s2]
+ 1299              	
+ 1300              	    xorrol      r12, r5, r6
+ 1301              	    str         r12, [r0, #mDu0_s2]
+ 1302              	    eors        lr, r4, r3
+ 1303              	    str         lr, [r0, #mDu1_s2]
+ 1304              	
+ 1305              	
+ 1306              	    @DIFFUSION SHARE 1
+ 1307              	    xor5        r3, Aku1_s1, Agu0_s1, Abu1_s1, Asu1_s1, Amu1_s1
+ 1308              	    xor5        r7, Ame0_s1, Ake0_s1, Age0_s1, Abe0_s1, Ase1_s1
+ 1309              	    xorrol      r6, r3, r7
+ 1310              	    str         r6, [r0, #mDa0_s1]
+ 1311              	    xor5        r6,  Aku0_s1, Agu1_s1, Abu0_s1, Asu0_s1, Amu0_s1
+ 1312              	    xor5        lr, Ame1_s1, Ake1_s1, Age1_s1, Abe1_s1, Ase0_s1
+ 1313              	    eors        r8, r6, lr
+ 1314              	    str         r8, [r0, #mDa1_s1]
+ 1315              	
+ 1316              	    xor5        r5,  Agi1_s1, Abi1_s1, Asi1_s1, Ami0_s1, Aki1_s1
+ 1317              	    xorrol      r9, r5, r6
+ 1318              	    str         r9, [r0, #mDo0_s1]
+ 1319              	    xor5        r4,  Agi0_s1, Abi0_s1, Asi0_s1, Ami1_s1, Aki0_s1
+ 1320              	    eors        r3, r3, r4
+ 1321              	    str         r3, [r0, #mDo1_s1]
+ 1322              	
+ 1323              	    xor5        r3,  Aba0_s1, Asa1_s1, Ama1_s1, Aka1_s1, Aga1_s1
+ 1324              	    xorrol      r10, r3, r4
+ 1325              	    str         r10, [r0, #mDe0_s1]
+ 1326              	    xor5        r6,  Aba1_s1, Asa0_s1, Ama0_s1, Aka0_s1, Aga0_s1
+ 1327              	    eors        r11, r6, r5
+ 1328              	    str         r11, [r0, #mDe1_s1]
+ 1329              	
+ 1330              	    xor5        r4,  Aso0_s1, Amo0_s1, Ako1_s1, Ago0_s1, Abo0_s1
+ 1331              	    xorrol      r5, lr, r4
+ 1332              	    str         r5, [r0, #mDi0_s1]
+ 1333              	    xor5        r5,  Aso1_s1, Amo1_s1, Ako0_s1, Ago1_s1, Abo1_s1
+ 1334              	    eors        r2, r7, r5
+ 1335              	    str         r2, [r0, #mDi1_s1]
+ 1336              	
+ 1337              	    xorrol      r12, r5, r6
+ 1338              	    str         r12, [r0, #mDu0_s1]
+ 1339              	    eors        lr, r4, r3
+ 1340              	    str         lr, [r0, #mDu1_s1]
+ 1341              	
+ 1342              	    KeccakThetaRhoPiChi r5, Ama0_s1, r8,  2, r6, Abe0_s1, r11, 23, r7, Aki0_s1, r2, 31, r3, Aso1_s1
+ 1343              	    KeccakThetaRhoPiChi r7, Aga0_s1, r8,  9, r3, Ame1_s1, r10,  0, r4, Abi0_s1, r2,  3, r5, Ako0_s1
+ 1344              	    ldr         r8, [r0, #mDa0_s1]
+ 1345              	    KeccakThetaRhoPiChi r4, Asa1_s1, r8, 18, r5, Age1_s1, r10,  5, r6, Ami1_s1, r2,  8, r7, Abo1_s1
+ 1346              	    KeccakThetaRhoPiChi r6, Aka1_s1, r8, 20, r7, Ase1_s1, r11,  1, r3, Agi0_s1, r2, 31, r4, Amo1_s1
+ 1347              	    ldr         r9, [r0, #mDo1_s1]
+ 1348              	    KeccakThetaRhoPiChiIota  Aba0_s1, r8,          Ake1_s1, r10, 22,      Asi0_s1, r2, 22,      Ago
+ 1349              	
+ 1350              	    ldr         r2, [r0, #mDi0_s1]
+ 1351              	    KeccakThetaRhoPiChi r5, Ama1_s1, r8,  1, r6, Abe1_s1, r10, 22, r7, Aki1_s1, r2, 30, r3, Aso0_s1
+ 1352              	    KeccakThetaRhoPiChi r7, Aga1_s1, r8,  9, r3, Ame0_s1, r11,  1, r4, Abi1_s1, r2,  3, r5, Ako1_s1
+ 1353              	    ldr         r8, [r0, #mDa1_s1]
+ 1354              	    KeccakThetaRhoPiChi r4, Asa0_s1, r8, 18, r5, Age0_s1, r11,  5, r6, Ami0_s1, r2,  7, r7, Abo0_s1
+ 1355              	    KeccakThetaRhoPiChi r6, Aka0_s1, r8, 21, r7, Ase0_s1, r10,  1, r3, Agi1_s1, r2, 31, r4, Amo0_s1
+ 1356              	    ldr         r9, [r0, #mDo0_s1]
+ 1357              	    KeccakThetaRhoPiChiIota  Aba1_s1, r8,          Ake0_s1, r11, 22,      Asi1_s1, r2, 21,      Ago
+ 1358              	.endm
+ 1359              	
+ 1360              	@----------------------------------------------------------------------------------
+ 1361              	@------------------------------------KECCAKROUND3 MACRO----------------------------
+ 1362              	@----------------------------------------------------------------------------------
+ 1363              	@This macro performs the fourth cyclic round of Keccak
+ 1364              	@----------------------------------------------------------------------------------
+ 1365              	
+ 1366              	
+ 1367              	.macro KeccakRound3
+ 1368              	    @DIFFUSION SHARE 0
+ 1369              	    xor5        r3,  Amu1_s0_M2, Agu0_s0_M2, Asu1_s0_M2, Aku0_s0_M2, Abu0_s0_M2
+ 1370              	    xor5        r7, Ake0_s0_M2, Abe1_s0_M2, Ame1_s0_M2, Age0_s0_M2, Ase1_s0_M2
+ 1371              	    xorrol      r6, r3, r7
+ 1372              	    str         r6, [r0, #mDa0_s0]
+ 1373              	    xor5        r6,  Amu0_s0_M2, Agu1_s0_M2, Asu0_s0_M2, Aku1_s0_M2, Abu1_s0_M2
+ 1374              	    xor5        lr, Ake1_s0_M2, Abe0_s0_M2, Ame0_s0_M2, Age1_s0_M2, Ase0_s0_M2
+ 1375              	    eors        r8, r6, lr
+ 1376              	    str         r8, [r0, #mDa1_s0]
+ 1377              	
+ 1378              	    xor5        r5,  Asi0_s0_M2, Aki0_s0_M2, Abi1_s0_M2, Ami1_s0_M2, Agi1_s0_M2
+ 1379              	    xorrol      r9, r5, r6
+ 1380              	    str         r9, [r0, #mDo0_s0]
+ 1381              	    xor5        r4,  Asi1_s0_M2, Aki1_s0_M2, Abi0_s0_M2, Ami0_s0_M2, Agi0_s0_M2
+ 1382              	    eors        r3, r3, r4
+ 1383              	    str         r3, [r0, #mDo1_s0]
+ 1384              	
+ 1385              	    xor5        r3,  Aba0_s0_M2, Ama0_s0_M2, Aga1_s0_M2, Asa1_s0_M2, Aka0_s0_M2
+ 1386              	    xorrol      r10, r3, r4
+ 1387              	    str         r10, [r0, #mDe0_s0]
+ 1388              	    xor5        r6,  Aba1_s0_M2, Ama1_s0_M2, Aga0_s0_M2, Asa0_s0_M2, Aka1_s0_M2
+ 1389              	    eors        r11, r6, r5
+ 1390              	    str         r11, [r0, #mDe1_s0]
+ 1391              	
+ 1392              	    xor5        r4,  Ago1_s0_M2, Aso0_s0_M2, Ako0_s0_M2, Abo0_s0_M2, Amo1_s0_M2
+ 1393              	    xorrol      r5, lr, r4
+ 1394              	    str         r5, [r0, #mDi0_s0]
+ 1395              	    xor5        r5,  Ago0_s0_M2, Aso1_s0_M2, Ako1_s0_M2, Abo1_s0_M2, Amo0_s0_M2
+ 1396              	    eors        r2, r7, r5
+ 1397              	    str         r2, [r0, #mDi1_s0]
+ 1398              	
+ 1399              	    xorrol      r12, r5, r6
+ 1400              	    str         r12, [r0, #mDu0_s0]
+ 1401              	    eors        lr, r4, r3
+ 1402              	    str         lr, [r0, #mDu1_s0]
+ 1403              	
+ 1404              	
+ 1405              	
+ 1406              	    @DIFFUSION SHARE 2
+ 1407              	    xor5        r3,  Amu1_s2_M2, Agu0_s2_M2, Asu1_s2_M2, Aku0_s2_M2, Abu0_s2_M2
+ 1408              	    xor5        r7, Ake0_s2_M2, Abe1_s2_M2, Ame1_s2_M2, Age0_s2_M2, Ase1_s2_M2
+ 1409              	    xorrol      r6, r3, r7
+ 1410              	    str         r6, [r0, #mDa0_s2]
+ 1411              	    xor5        r6,  Amu0_s2_M2, Agu1_s2_M2, Asu0_s2_M2, Aku1_s2_M2, Abu1_s2_M2
+ 1412              	    xor5        lr, Ake1_s2_M2, Abe0_s2_M2, Ame0_s2_M2, Age1_s2_M2, Ase0_s2_M2
+ 1413              	    eors        r8, r6, lr
+ 1414              	    str         r8, [r0, #mDa1_s2]
+ 1415              	
+ 1416              	    xor5        r5,  Asi0_s2_M2, Aki0_s2_M2, Abi1_s2_M2, Ami1_s2_M2, Agi1_s2_M2
+ 1417              	    xorrol      r9, r5, r6
+ 1418              	    str         r9, [r0, #mDo0_s2]
+ 1419              	    xor5        r4,  Asi1_s2_M2, Aki1_s2_M2, Abi0_s2_M2, Ami0_s2_M2, Agi0_s2_M2
+ 1420              	    eors        r3, r3, r4
+ 1421              	    str         r3, [r0, #mDo1_s2]
+ 1422              	
+ 1423              	    xor5        r3,  Aba0_s2_M2, Ama0_s2_M2, Aga1_s2_M2, Asa1_s2_M2, Aka0_s2_M2
+ 1424              	    xorrol      r10, r3, r4
+ 1425              	    str         r10, [r0, #mDe0_s2]
+ 1426              	    xor5        r6,  Aba1_s2_M2, Ama1_s2_M2, Aga0_s2_M2, Asa0_s2_M2, Aka1_s2_M2
+ 1427              	    eors        r11, r6, r5
+ 1428              	    str         r11, [r0, #mDe1_s2]
+ 1429              	
+ 1430              	    xor5        r4,  Ago1_s2_M2, Aso0_s2_M2, Ako0_s2_M2, Abo0_s2_M2, Amo1_s2_M2
+ 1431              	    xorrol      r5, lr, r4
+ 1432              	    str         r5, [r0, #mDi0_s2]
+ 1433              	    xor5        r5,  Ago0_s2_M2, Aso1_s2_M2, Ako1_s2_M2, Abo1_s2_M2, Amo0_s2_M2
+ 1434              	    eors        r2, r7, r5
+ 1435              	    str         r2, [r0, #mDi1_s2]
+ 1436              	
+ 1437              	    xorrol      r12, r5, r6
+ 1438              	    str         r12, [r0, #mDu0_s2]
+ 1439              	    eors        lr, r4, r3
+ 1440              	    str         lr, [r0, #mDu1_s2]
+ 1441              	
+ 1442              	
+ 1443              	
+ 1444              	    @DIFFUSION SHARE 1
+ 1445              	    xor5        r3,  Amu1_s1_M2, Agu0_s1_M2, Asu1_s1_M2, Aku0_s1_M2, Abu0_s1_M2
+ 1446              	    xor5        r7, Ake0_s1_M2, Abe1_s1_M2, Ame1_s1_M2, Age0_s1_M2, Ase1_s1_M2
+ 1447              	    xorrol      r6, r3, r7
+ 1448              	    str         r6, [r0, #mDa0_s1]
+ 1449              	    xor5        r6,  Amu0_s1_M2, Agu1_s1_M2, Asu0_s1_M2, Aku1_s1_M2, Abu1_s1_M2
+ 1450              	    xor5        lr, Ake1_s1_M2, Abe0_s1_M2, Ame0_s1_M2, Age1_s1_M2, Ase0_s1_M2
+ 1451              	    eors        r8, r6, lr
+ 1452              	    str         r8, [r0, #mDa1_s1]
+ 1453              	
+ 1454              	    xor5        r5,  Asi0_s1_M2, Aki0_s1_M2, Abi1_s1_M2, Ami1_s1_M2, Agi1_s1_M2
+ 1455              	    xorrol      r9, r5, r6
+ 1456              	    str         r9, [r0, #mDo0_s1]
+ 1457              	    xor5        r4,  Asi1_s1_M2, Aki1_s1_M2, Abi0_s1_M2, Ami0_s1_M2, Agi0_s1_M2
+ 1458              	    eors        r3, r3, r4
+ 1459              	    str         r3, [r0, #mDo1_s1]
+ 1460              	
+ 1461              	    xor5        r3,  Aba0_s1_M2, Ama0_s1_M2, Aga1_s1_M2, Asa1_s1_M2, Aka0_s1_M2
+ 1462              	    xorrol      r10, r3, r4
+ 1463              	    str         r10, [r0, #mDe0_s1]
+ 1464              	    xor5        r6,  Aba1_s1_M2, Ama1_s1_M2, Aga0_s1_M2, Asa0_s1_M2, Aka1_s1_M2
+ 1465              	    eors        r11, r6, r5
+ 1466              	    str         r11, [r0, #mDe1_s1]
+ 1467              	
+ 1468              	    xor5        r4,  Ago1_s1_M2, Aso0_s1_M2, Ako0_s1_M2, Abo0_s1_M2, Amo1_s1_M2
+ 1469              	    xorrol      r5, lr, r4
+ 1470              	    str         r5, [r0, #mDi0_s1]
+ 1471              	    xor5        r5,  Ago0_s1_M2, Aso1_s1_M2, Ako1_s1_M2, Abo1_s1_M2, Amo0_s1_M2
+ 1472              	    eors        r2, r7, r5
+ 1473              	    str         r2, [r0, #mDi1_s1]
+ 1474              	
+ 1475              	    xorrol      r12, r5, r6
+ 1476              	    str         r12, [r0, #mDu0_s1]
+ 1477              	    eors        lr, r4, r3
+ 1478              	    str         lr, [r0, #mDu1_s1]
+ 1479              	
+ 1480              	
+ 1481              	
+ 1482              	
+ 1483              	KeccakThetaRhoPiChi r5, Aga0_s1_M2, r8,  2, r6, Age0_s1_M2, r11, 23, r7, Agi0_s1_M2, r2, 31, r3, Ag
+ 1484              	KeccakThetaRhoPiChi r7, Aka1_s1_M2, r8,  9, r3, Ake1_s1_M2, r10,  0, r4, Aki1_s1_M2, r2,  3, r5, Ak
+ 1485              	ldr         r8, [r0, #mDa0_s1]
+ 1486              	KeccakThetaRhoPiChi r4, Ama0_s1_M2, r8, 18, r5, Ame0_s1_M2, r10,  5, r6, Ami0_s1_M2, r2,  8, r7, Am
+ 1487              	KeccakThetaRhoPiChi r6, Asa1_s1_M2, r8, 20, r7, Ase1_s1_M2, r11,  1, r3, Asi1_s1_M2, r2, 31, r4, As
+ 1488              	ldr         r9, [r0, #mDo1_s1]
+ 1489              	KeccakThetaRhoPiChiIota  Aba0_s1_M2, r8,          Abe0_s1_M2, r10, 22,      Abi0_s1_M2, r2, 22,    
+ 1490              	
+ 1491              	ldr         r2, [r0, #mDi0_s1]
+ 1492              	KeccakThetaRhoPiChi r5, Aga1_s1_M2, r8,  1, r6, Age1_s1_M2, r10, 22, r7, Agi1_s1_M2, r2, 30, r3, Ag
+ 1493              	KeccakThetaRhoPiChi r7, Aka0_s1_M2, r8,  9, r3, Ake0_s1_M2, r11,  1, r4, Aki0_s1_M2, r2,  3, r5, Ak
+ 1494              	ldr         r8, [r0, #mDa1_s1]
+ 1495              	KeccakThetaRhoPiChi r4, Ama1_s1_M2, r8, 18, r5, Ame1_s1_M2, r11,  5, r6, Ami1_s1_M2, r2,  7, r7, Am
+ 1496              	KeccakThetaRhoPiChi r6, Asa0_s1_M2, r8, 21, r7, Ase0_s1_M2, r10,  1, r3, Asi0_s1_M2, r2, 31, r4, As
+ 1497              	ldr         r9, [r0, #mDo0_s1]
+ 1498              	KeccakThetaRhoPiChiIota  Aba1_s1_M2, r8,          Abe1_s1_M2, r11, 22,      Abi1_s1_M2, r2, 21,    
+ 1499              	
+ 1500              	.endm
+ 1501              	
+ 1502              	
+ 1503              	.macro SaveRegisters
+ 1504              	    str r0, [r0, #memR0]
+ 1505              	    str r1, [r0, #memR1]
+ 1506              	    str r2, [r0, #memR2]
+ 1507              	    str r3, [r0, #memR3]
+ 1508              	    str r4, [r0, #memR4]
+ 1509              	    str r5, [r0, #memR5]
+ 1510              	    str r6, [r0, #memR6]
+ 1511              	    str r7, [r0, #memR7]
+ 1512              	    str r8, [r0, #memR8]
+ 1513              	    str r9, [r0, #memR9]
+ 1514              	    str r10, [r0, #memR10]
+ 1515              	    str r11, [r0, #memR11]
+ 1516              	    str r12, [r0, #memR12]
+ 1517              	    str lr, [r0, #memLR]
+ 1518              	.endm
+ 1519              	
+ 1520              	
+ 1521              	.macro LoadRegisters
+ 1522              	    ldr r1, [r0, #memR1]
+ 1523              	    ldr r2, [r0, #memR2]
+ 1524              	    ldr r3, [r0, #memR3]
+ 1525              	    ldr r4, [r0, #memR4]
+ 1526              	    ldr r5, [r0, #memR5]
+ 1527              	    ldr r6, [r0, #memR6]
+ 1528              	    ldr r7, [r0, #memR7]
+ 1529              	    ldr r8, [r0, #memR8]
+ 1530              	    ldr r9, [r0, #memR9]
+ 1531              	    ldr r10, [r0, #memR10]
+ 1532              	    ldr r11, [r0, #memR11]
+ 1533              	    ldr r12, [r0, #memR12]
+ 1534              	    ldr lr, [r0, #memLR]
+ 1535              	.endm
+ 1536              	
+ 1537              	
+ 1538              	@----------------------------------------------------------------------------------
+ 1539              	@---------------------KECCAKF1600_STATEPERMUTE FUNCTION----------------------------
+ 1540              	@----------------------------------------------------------------------------------
+ 1541              	@This function sets up the round constants pointer and jumps to the permutation core (function Kecc
+ 1542              	@----------------------------------------------------------------------------------
+ 1543              	
+ 1544              	
+ 1545              	@  void KeccakF1600_StatePermute( void *state )
+ 1546              	@
+ 1547              	.align 8
+ 1548              	.global  KeccakF1600_StatePermute
+ 1550              	KeccakF1600_StatePermute:
+1551:Keccak1600NoOpt.S ****     adr     r1, KeccakP1600_Permute_RoundConstants24
+1552:Keccak1600NoOpt.S ****     b       KeccakP1600_Permute
+ 1553 0004 AFF30080 	.align 8
+ 1553      AFF30080 
+ 1553      AFF30080 
+ 1553      AFF30080 
+ 1553      AFF30080 
+ 1554              	KeccakP1600_Permute_RoundConstants24:
+ 1555              	    @       0           1
+ 1556 0100 01000000 			.long      0x00000001, 0x00000000
+ 1556      00000000 
+ 1557 0108 00000000 			.long      0x00000000, 0x00000089
+ 1557      89000000 
+ 1558 0110 00000000 			.long      0x00000000, 0x8000008b
+ 1558      8B000080 
+ 1559 0118 00000000 			.long      0x00000000, 0x80008080
+ 1559      80800080 
+ 1560 0120 01000000 			.long      0x00000001, 0x0000008b
+ 1560      8B000000 
+ 1561 0128 01000000 			.long      0x00000001, 0x00008000
+ 1561      00800000 
+ 1562 0130 01000000 			.long      0x00000001, 0x80008088
+ 1562      88800080 
+ 1563 0138 01000000 			.long      0x00000001, 0x80000082
+ 1563      82000080 
+ 1564 0140 00000000 			.long      0x00000000, 0x0000000b
+ 1564      0B000000 
+ 1565 0148 00000000 			.long      0x00000000, 0x0000000a
+ 1565      0A000000 
+ 1566 0150 01000000 			.long      0x00000001, 0x00008082
+ 1566      82800000 
+ 1567 0158 00000000 			.long      0x00000000, 0x00008003
+ 1567      03800000 
+ 1568              	KeccakP1600_Permute_RoundConstants12:
+ 1569 0160 01000000 			.long      0x00000001, 0x0000808b
+ 1569      8B800000 
+ 1570 0168 01000000 			.long      0x00000001, 0x8000000b
+ 1570      0B000080 
+ 1571 0170 01000000 			.long      0x00000001, 0x8000008a
+ 1571      8A000080 
+ 1572 0178 01000000 			.long      0x00000001, 0x80000081
+ 1572      81000080 
+ 1573 0180 00000000 			.long      0x00000000, 0x80000081
+ 1573      81000080 
+ 1574 0188 00000000 			.long      0x00000000, 0x80000008
+ 1574      08000080 
+ 1575 0190 00000000 			.long      0x00000000, 0x00000083
+ 1575      83000000 
+ 1576 0198 00000000 			.long      0x00000000, 0x80008003
+ 1576      03800080 
+ 1577              	KeccakP1600_Permute_RoundConstants0:
+ 1578 01a0 01000000 			.long      0x00000001, 0x80008088
+ 1578      88800080 
+ 1579 01a8 00000000 			.long      0x00000000, 0x80000088
+ 1579      88000080 
+ 1580 01b0 01000000 			.long      0x00000001, 0x00008000
+ 1580      00800000 
+ 1581 01b8 00000000 			.long      0x00000000, 0x80008082
+ 1581      82800080 
+ 1582              	KeccakP1600_Permute_RoundConstants0Mod4:
+ 1583 01c0 FF000000 			.long      0x000000FF  @terminator
+ 1584              	
+ 1585              	
+ 1586              	@----------------------------------------------------------------------------------
+ 1587              	@---------------------KECCAKP1600_PERMUTE FUNCTION----------------------------
+ 1588              	@----------------------------------------------------------------------------------
+ 1589              	@This function applies the four cyclic rounds 6 times to perform a 24 rounds based Keccak
+ 1590              	@----------------------------------------------------------------------------------
+ 1591              	
+ 1592              	@ void KeccakP1600_Permute( void *state, void * rc )
+ 1593 01c4 AFF30080 	.align 8
+ 1593      AFF30080 
+ 1593      AFF30080 
+ 1593      AFF30080 
+ 1593      AFF30080 
+ 1594              	KeccakP1600_Permute:
+1595:Keccak1600NoOpt.S ****     push    { r4 - r12, lr }
+1596:Keccak1600NoOpt.S ****     str     r1, [r0, #mRC]
+ 1597              	    KeccakP1600_Permute_RoundLoop:
+1598:Keccak1600NoOpt.S ****         KeccakRound0
+1599:Keccak1600NoOpt.S ****     SaveRegisters
+1600:Keccak1600NoOpt.S ****     pop    { r4 - r12, pc }
+ 1601              	
+ 1602              	
+ 1603              	@ void KeccakP1600_Permute0( void *state, void * rc )
+ 1604 1fae 00BFAFF3 	.align 8
+ 1604      0080AFF3 
+ 1604      0080AFF3 
+ 1604      0080AFF3 
+ 1604      00800000 
+ 1605              	.global  KeccakP1600_Permute0
+ 1607              	KeccakP1600_Permute0:
+ 1608              	    KeccakP1600_Permute_0:
+1609:Keccak1600NoOpt.S ****         push    { r4 - r12, lr }
+1610:Keccak1600NoOpt.S ****         LoadRegisters
+1611:Keccak1600NoOpt.S ****         KeccakRound0
+1612:Keccak1600NoOpt.S ****         SaveRegisters
+1613:Keccak1600NoOpt.S ****     pop    { r4 - r12, pc }
+ 1614              	
+ 1615              	
+ 1616              	@ void KeccakP1600_Permute1( void *state, void * rc )
+ 1617 3dde 00BFAFF3 	.align 8
+ 1617      0080AFF3 
+ 1617      0080AFF3 
+ 1617      0080AFF3 
+ 1617      0080AFF3 
+ 1618              	.global  KeccakP1600_Permute1
+ 1620              	KeccakP1600_Permute1:
+ 1621              	    KeccakP1600_Permute_1:
+1622:Keccak1600NoOpt.S ****         push    { r4 - r12, lr }
+1623:Keccak1600NoOpt.S ****         LoadRegisters
+1624:Keccak1600NoOpt.S ****         KeccakRound1
+1625:Keccak1600NoOpt.S ****         SaveRegisters
+1626:Keccak1600NoOpt.S ****     pop    { r4 - r12, pc }
+ 1627              	
+ 1628              	
+ 1629              	@ void KeccakP1600_Permute2( void *state, void * rc )
+ 1630 5c18 AFF30080 	.align 8
+ 1630      AFF30080 
+ 1630      AFF30080 
+ 1630      AFF30080 
+ 1630      AFF30080 
+ 1631              	.global  KeccakP1600_Permute2
+ 1633              	KeccakP1600_Permute2:
+ 1634              	    KeccakP1600_Permute_2:
+1635:Keccak1600NoOpt.S ****         push    { r4 - r12, lr }
+1636:Keccak1600NoOpt.S ****         LoadRegisters
+1637:Keccak1600NoOpt.S ****         KeccakRound2
+1638:Keccak1600NoOpt.S ****         SaveRegisters
+1639:Keccak1600NoOpt.S ****     pop    { r4 - r12, pc }
+ 1640              	
+ 1641              	
+ 1642              	@ void KeccakP1600_Permute3( void *state, void * rc )
+ 1643 7ae4 AFF30080 	.align 8
+ 1643      AFF30080 
+ 1643      AFF30080 
+ 1643      AFF30080 
+ 1643      AFF30080 
+ 1644              	.global  KeccakP1600_Permute3
+ 1646              	KeccakP1600_Permute3:
+ 1647              	    KeccakP1600_Permute_3:
+1648:Keccak1600NoOpt.S ****         push    { r4 - r12, lr }
+1649:Keccak1600NoOpt.S ****         LoadRegisters
+1650:Keccak1600NoOpt.S ****         KeccakRound3
+1651:Keccak1600NoOpt.S ****         SaveRegisters
+1652:Keccak1600NoOpt.S ****     pop    { r4 - r12, pc }...
+DEFINED SYMBOLS
+   Keccak1600NoOpt.S:22     *ABS*:0000000000000000 Aba0_s0
+   Keccak1600NoOpt.S:23     *ABS*:0000000000000004 Aba1_s0
+   Keccak1600NoOpt.S:24     *ABS*:0000000000000008 Abe0_s0
+   Keccak1600NoOpt.S:25     *ABS*:000000000000000c Abe1_s0
+   Keccak1600NoOpt.S:26     *ABS*:0000000000000010 Abi0_s0
+   Keccak1600NoOpt.S:27     *ABS*:0000000000000014 Abi1_s0
+   Keccak1600NoOpt.S:28     *ABS*:0000000000000018 Abo0_s0
+   Keccak1600NoOpt.S:29     *ABS*:000000000000001c Abo1_s0
+   Keccak1600NoOpt.S:30     *ABS*:0000000000000020 Abu0_s0
+   Keccak1600NoOpt.S:31     *ABS*:0000000000000024 Abu1_s0
+   Keccak1600NoOpt.S:32     *ABS*:0000000000000028 Aga0_s0
+   Keccak1600NoOpt.S:33     *ABS*:000000000000002c Aga1_s0
+   Keccak1600NoOpt.S:34     *ABS*:0000000000000030 Age0_s0
+   Keccak1600NoOpt.S:35     *ABS*:0000000000000034 Age1_s0
+   Keccak1600NoOpt.S:36     *ABS*:0000000000000038 Agi0_s0
+   Keccak1600NoOpt.S:37     *ABS*:000000000000003c Agi1_s0
+   Keccak1600NoOpt.S:38     *ABS*:0000000000000040 Ago0_s0
+   Keccak1600NoOpt.S:39     *ABS*:0000000000000044 Ago1_s0
+   Keccak1600NoOpt.S:40     *ABS*:0000000000000048 Agu0_s0
+   Keccak1600NoOpt.S:41     *ABS*:000000000000004c Agu1_s0
+   Keccak1600NoOpt.S:42     *ABS*:0000000000000050 Aka0_s0
+   Keccak1600NoOpt.S:43     *ABS*:0000000000000054 Aka1_s0
+   Keccak1600NoOpt.S:44     *ABS*:0000000000000058 Ake0_s0
+   Keccak1600NoOpt.S:45     *ABS*:000000000000005c Ake1_s0
+   Keccak1600NoOpt.S:46     *ABS*:0000000000000060 Aki0_s0
+   Keccak1600NoOpt.S:47     *ABS*:0000000000000064 Aki1_s0
+   Keccak1600NoOpt.S:48     *ABS*:0000000000000068 Ako0_s0
+   Keccak1600NoOpt.S:49     *ABS*:000000000000006c Ako1_s0
+   Keccak1600NoOpt.S:50     *ABS*:0000000000000070 Aku0_s0
+   Keccak1600NoOpt.S:51     *ABS*:0000000000000074 Aku1_s0
+   Keccak1600NoOpt.S:52     *ABS*:0000000000000078 Ama0_s0
+   Keccak1600NoOpt.S:53     *ABS*:000000000000007c Ama1_s0
+   Keccak1600NoOpt.S:54     *ABS*:0000000000000080 Ame0_s0
+   Keccak1600NoOpt.S:55     *ABS*:0000000000000084 Ame1_s0
+   Keccak1600NoOpt.S:56     *ABS*:0000000000000088 Ami0_s0
+   Keccak1600NoOpt.S:57     *ABS*:000000000000008c Ami1_s0
+   Keccak1600NoOpt.S:58     *ABS*:0000000000000090 Amo0_s0
+   Keccak1600NoOpt.S:59     *ABS*:0000000000000094 Amo1_s0
+   Keccak1600NoOpt.S:60     *ABS*:0000000000000098 Amu0_s0
+   Keccak1600NoOpt.S:61     *ABS*:000000000000009c Amu1_s0
+   Keccak1600NoOpt.S:62     *ABS*:00000000000000a0 Asa0_s0
+   Keccak1600NoOpt.S:63     *ABS*:00000000000000a4 Asa1_s0
+   Keccak1600NoOpt.S:64     *ABS*:00000000000000a8 Ase0_s0
+   Keccak1600NoOpt.S:65     *ABS*:00000000000000ac Ase1_s0
+   Keccak1600NoOpt.S:66     *ABS*:00000000000000b0 Asi0_s0
+   Keccak1600NoOpt.S:67     *ABS*:00000000000000b4 Asi1_s0
+   Keccak1600NoOpt.S:68     *ABS*:00000000000000b8 Aso0_s0
+   Keccak1600NoOpt.S:69     *ABS*:00000000000000bc Aso1_s0
+   Keccak1600NoOpt.S:70     *ABS*:00000000000000c0 Asu0_s0
+   Keccak1600NoOpt.S:71     *ABS*:00000000000000c4 Asu1_s0
+   Keccak1600NoOpt.S:73     *ABS*:00000000000000c8 Aba0_s1
+   Keccak1600NoOpt.S:74     *ABS*:00000000000000cc Aba1_s1
+   Keccak1600NoOpt.S:75     *ABS*:00000000000000d0 Abe0_s1
+   Keccak1600NoOpt.S:76     *ABS*:00000000000000d4 Abe1_s1
+   Keccak1600NoOpt.S:77     *ABS*:00000000000000d8 Abi0_s1
+   Keccak1600NoOpt.S:78     *ABS*:00000000000000dc Abi1_s1
+   Keccak1600NoOpt.S:79     *ABS*:00000000000000e0 Abo0_s1
+   Keccak1600NoOpt.S:80     *ABS*:00000000000000e4 Abo1_s1
+   Keccak1600NoOpt.S:81     *ABS*:00000000000000e8 Abu0_s1
+   Keccak1600NoOpt.S:82     *ABS*:00000000000000ec Abu1_s1
+   Keccak1600NoOpt.S:83     *ABS*:00000000000000f0 Aga0_s1
+   Keccak1600NoOpt.S:84     *ABS*:00000000000000f4 Aga1_s1
+   Keccak1600NoOpt.S:85     *ABS*:00000000000000f8 Age0_s1
+   Keccak1600NoOpt.S:86     *ABS*:00000000000000fc Age1_s1
+   Keccak1600NoOpt.S:87     *ABS*:0000000000000100 Agi0_s1
+   Keccak1600NoOpt.S:88     *ABS*:0000000000000104 Agi1_s1
+   Keccak1600NoOpt.S:89     *ABS*:0000000000000108 Ago0_s1
+   Keccak1600NoOpt.S:90     *ABS*:000000000000010c Ago1_s1
+   Keccak1600NoOpt.S:91     *ABS*:0000000000000110 Agu0_s1
+   Keccak1600NoOpt.S:92     *ABS*:0000000000000114 Agu1_s1
+   Keccak1600NoOpt.S:93     *ABS*:0000000000000118 Aka0_s1
+   Keccak1600NoOpt.S:94     *ABS*:000000000000011c Aka1_s1
+   Keccak1600NoOpt.S:95     *ABS*:0000000000000120 Ake0_s1
+   Keccak1600NoOpt.S:96     *ABS*:0000000000000124 Ake1_s1
+   Keccak1600NoOpt.S:97     *ABS*:0000000000000128 Aki0_s1
+   Keccak1600NoOpt.S:98     *ABS*:000000000000012c Aki1_s1
+   Keccak1600NoOpt.S:99     *ABS*:0000000000000130 Ako0_s1
+   Keccak1600NoOpt.S:100    *ABS*:0000000000000134 Ako1_s1
+   Keccak1600NoOpt.S:101    *ABS*:0000000000000138 Aku0_s1
+   Keccak1600NoOpt.S:102    *ABS*:000000000000013c Aku1_s1
+   Keccak1600NoOpt.S:103    *ABS*:0000000000000140 Ama0_s1
+   Keccak1600NoOpt.S:104    *ABS*:0000000000000144 Ama1_s1
+   Keccak1600NoOpt.S:105    *ABS*:0000000000000148 Ame0_s1
+   Keccak1600NoOpt.S:106    *ABS*:000000000000014c Ame1_s1
+   Keccak1600NoOpt.S:107    *ABS*:0000000000000150 Ami0_s1
+   Keccak1600NoOpt.S:108    *ABS*:0000000000000154 Ami1_s1
+   Keccak1600NoOpt.S:109    *ABS*:0000000000000158 Amo0_s1
+   Keccak1600NoOpt.S:110    *ABS*:000000000000015c Amo1_s1
+   Keccak1600NoOpt.S:111    *ABS*:0000000000000160 Amu0_s1
+   Keccak1600NoOpt.S:112    *ABS*:0000000000000164 Amu1_s1
+   Keccak1600NoOpt.S:113    *ABS*:0000000000000168 Asa0_s1
+   Keccak1600NoOpt.S:114    *ABS*:000000000000016c Asa1_s1
+   Keccak1600NoOpt.S:115    *ABS*:0000000000000170 Ase0_s1
+   Keccak1600NoOpt.S:116    *ABS*:0000000000000174 Ase1_s1
+   Keccak1600NoOpt.S:117    *ABS*:0000000000000178 Asi0_s1
+   Keccak1600NoOpt.S:118    *ABS*:000000000000017c Asi1_s1
+   Keccak1600NoOpt.S:119    *ABS*:0000000000000180 Aso0_s1
+   Keccak1600NoOpt.S:120    *ABS*:0000000000000184 Aso1_s1
+   Keccak1600NoOpt.S:121    *ABS*:0000000000000188 Asu0_s1
+   Keccak1600NoOpt.S:122    *ABS*:000000000000018c Asu1_s1
+   Keccak1600NoOpt.S:124    *ABS*:0000000000000190 Aba0_s2
+   Keccak1600NoOpt.S:125    *ABS*:0000000000000194 Aba1_s2
+   Keccak1600NoOpt.S:126    *ABS*:0000000000000198 Abe0_s2
+   Keccak1600NoOpt.S:127    *ABS*:000000000000019c Abe1_s2
+   Keccak1600NoOpt.S:128    *ABS*:00000000000001a0 Abi0_s2
+   Keccak1600NoOpt.S:129    *ABS*:00000000000001a4 Abi1_s2
+   Keccak1600NoOpt.S:130    *ABS*:00000000000001a8 Abo0_s2
+   Keccak1600NoOpt.S:131    *ABS*:00000000000001ac Abo1_s2
+   Keccak1600NoOpt.S:132    *ABS*:00000000000001b0 Abu0_s2
+   Keccak1600NoOpt.S:133    *ABS*:00000000000001b4 Abu1_s2
+   Keccak1600NoOpt.S:134    *ABS*:00000000000001b8 Aga0_s2
+   Keccak1600NoOpt.S:135    *ABS*:00000000000001bc Aga1_s2
+   Keccak1600NoOpt.S:136    *ABS*:00000000000001c0 Age0_s2
+   Keccak1600NoOpt.S:137    *ABS*:00000000000001c4 Age1_s2
+   Keccak1600NoOpt.S:138    *ABS*:00000000000001c8 Agi0_s2
+   Keccak1600NoOpt.S:139    *ABS*:00000000000001cc Agi1_s2
+   Keccak1600NoOpt.S:140    *ABS*:00000000000001d0 Ago0_s2
+   Keccak1600NoOpt.S:141    *ABS*:00000000000001d4 Ago1_s2
+   Keccak1600NoOpt.S:142    *ABS*:00000000000001d8 Agu0_s2
+   Keccak1600NoOpt.S:143    *ABS*:00000000000001dc Agu1_s2
+   Keccak1600NoOpt.S:144    *ABS*:00000000000001e0 Aka0_s2
+   Keccak1600NoOpt.S:145    *ABS*:00000000000001e4 Aka1_s2
+   Keccak1600NoOpt.S:146    *ABS*:00000000000001e8 Ake0_s2
+   Keccak1600NoOpt.S:147    *ABS*:00000000000001ec Ake1_s2
+   Keccak1600NoOpt.S:148    *ABS*:00000000000001f0 Aki0_s2
+   Keccak1600NoOpt.S:149    *ABS*:00000000000001f4 Aki1_s2
+   Keccak1600NoOpt.S:150    *ABS*:00000000000001f8 Ako0_s2
+   Keccak1600NoOpt.S:151    *ABS*:00000000000001fc Ako1_s2
+   Keccak1600NoOpt.S:152    *ABS*:0000000000000200 Aku0_s2
+   Keccak1600NoOpt.S:153    *ABS*:0000000000000204 Aku1_s2
+   Keccak1600NoOpt.S:154    *ABS*:0000000000000208 Ama0_s2
+   Keccak1600NoOpt.S:155    *ABS*:000000000000020c Ama1_s2
+   Keccak1600NoOpt.S:156    *ABS*:0000000000000210 Ame0_s2
+   Keccak1600NoOpt.S:157    *ABS*:0000000000000214 Ame1_s2
+   Keccak1600NoOpt.S:158    *ABS*:0000000000000218 Ami0_s2
+   Keccak1600NoOpt.S:159    *ABS*:000000000000021c Ami1_s2
+   Keccak1600NoOpt.S:160    *ABS*:0000000000000220 Amo0_s2
+   Keccak1600NoOpt.S:161    *ABS*:0000000000000224 Amo1_s2
+   Keccak1600NoOpt.S:162    *ABS*:0000000000000228 Amu0_s2
+   Keccak1600NoOpt.S:163    *ABS*:000000000000022c Amu1_s2
+   Keccak1600NoOpt.S:164    *ABS*:0000000000000230 Asa0_s2
+   Keccak1600NoOpt.S:165    *ABS*:0000000000000234 Asa1_s2
+   Keccak1600NoOpt.S:166    *ABS*:0000000000000238 Ase0_s2
+   Keccak1600NoOpt.S:167    *ABS*:000000000000023c Ase1_s2
+   Keccak1600NoOpt.S:168    *ABS*:0000000000000240 Asi0_s2
+   Keccak1600NoOpt.S:169    *ABS*:0000000000000244 Asi1_s2
+   Keccak1600NoOpt.S:170    *ABS*:0000000000000248 Aso0_s2
+   Keccak1600NoOpt.S:171    *ABS*:000000000000024c Aso1_s2
+   Keccak1600NoOpt.S:172    *ABS*:0000000000000250 Asu0_s2
+   Keccak1600NoOpt.S:173    *ABS*:0000000000000254 Asu1_s2
+   Keccak1600NoOpt.S:181    *ABS*:0000000000000258 Aba0_s0_M2
+   Keccak1600NoOpt.S:182    *ABS*:000000000000025c Aba1_s0_M2
+   Keccak1600NoOpt.S:183    *ABS*:0000000000000260 Abe0_s0_M2
+   Keccak1600NoOpt.S:184    *ABS*:0000000000000264 Abe1_s0_M2
+   Keccak1600NoOpt.S:185    *ABS*:0000000000000268 Abi0_s0_M2
+   Keccak1600NoOpt.S:186    *ABS*:000000000000026c Abi1_s0_M2
+   Keccak1600NoOpt.S:187    *ABS*:0000000000000270 Abo0_s0_M2
+   Keccak1600NoOpt.S:188    *ABS*:0000000000000274 Abo1_s0_M2
+   Keccak1600NoOpt.S:189    *ABS*:0000000000000278 Abu0_s0_M2
+   Keccak1600NoOpt.S:190    *ABS*:000000000000027c Abu1_s0_M2
+   Keccak1600NoOpt.S:191    *ABS*:0000000000000280 Aga0_s0_M2
+   Keccak1600NoOpt.S:192    *ABS*:0000000000000284 Aga1_s0_M2
+   Keccak1600NoOpt.S:193    *ABS*:0000000000000288 Age0_s0_M2
+   Keccak1600NoOpt.S:194    *ABS*:000000000000028c Age1_s0_M2
+   Keccak1600NoOpt.S:195    *ABS*:0000000000000290 Agi0_s0_M2
+   Keccak1600NoOpt.S:196    *ABS*:0000000000000294 Agi1_s0_M2
+   Keccak1600NoOpt.S:197    *ABS*:0000000000000298 Ago0_s0_M2
+   Keccak1600NoOpt.S:198    *ABS*:000000000000029c Ago1_s0_M2
+   Keccak1600NoOpt.S:199    *ABS*:00000000000002a0 Agu0_s0_M2
+   Keccak1600NoOpt.S:200    *ABS*:00000000000002a4 Agu1_s0_M2
+   Keccak1600NoOpt.S:201    *ABS*:00000000000002a8 Aka0_s0_M2
+   Keccak1600NoOpt.S:202    *ABS*:00000000000002ac Aka1_s0_M2
+   Keccak1600NoOpt.S:203    *ABS*:00000000000002b0 Ake0_s0_M2
+   Keccak1600NoOpt.S:204    *ABS*:00000000000002b4 Ake1_s0_M2
+   Keccak1600NoOpt.S:205    *ABS*:00000000000002b8 Aki0_s0_M2
+   Keccak1600NoOpt.S:206    *ABS*:00000000000002bc Aki1_s0_M2
+   Keccak1600NoOpt.S:207    *ABS*:00000000000002c0 Ako0_s0_M2
+   Keccak1600NoOpt.S:208    *ABS*:00000000000002c4 Ako1_s0_M2
+   Keccak1600NoOpt.S:209    *ABS*:00000000000002c8 Aku0_s0_M2
+   Keccak1600NoOpt.S:210    *ABS*:00000000000002cc Aku1_s0_M2
+   Keccak1600NoOpt.S:211    *ABS*:00000000000002d0 Ama0_s0_M2
+   Keccak1600NoOpt.S:212    *ABS*:00000000000002d4 Ama1_s0_M2
+   Keccak1600NoOpt.S:213    *ABS*:00000000000002d8 Ame0_s0_M2
+   Keccak1600NoOpt.S:214    *ABS*:00000000000002dc Ame1_s0_M2
+   Keccak1600NoOpt.S:215    *ABS*:00000000000002e0 Ami0_s0_M2
+   Keccak1600NoOpt.S:216    *ABS*:00000000000002e4 Ami1_s0_M2
+   Keccak1600NoOpt.S:217    *ABS*:00000000000002e8 Amo0_s0_M2
+   Keccak1600NoOpt.S:218    *ABS*:00000000000002ec Amo1_s0_M2
+   Keccak1600NoOpt.S:219    *ABS*:00000000000002f0 Amu0_s0_M2
+   Keccak1600NoOpt.S:220    *ABS*:00000000000002f4 Amu1_s0_M2
+   Keccak1600NoOpt.S:221    *ABS*:00000000000002f8 Asa0_s0_M2
+   Keccak1600NoOpt.S:222    *ABS*:00000000000002fc Asa1_s0_M2
+   Keccak1600NoOpt.S:223    *ABS*:0000000000000300 Ase0_s0_M2
+   Keccak1600NoOpt.S:224    *ABS*:0000000000000304 Ase1_s0_M2
+   Keccak1600NoOpt.S:225    *ABS*:0000000000000308 Asi0_s0_M2
+   Keccak1600NoOpt.S:226    *ABS*:000000000000030c Asi1_s0_M2
+   Keccak1600NoOpt.S:227    *ABS*:0000000000000310 Aso0_s0_M2
+   Keccak1600NoOpt.S:228    *ABS*:0000000000000314 Aso1_s0_M2
+   Keccak1600NoOpt.S:229    *ABS*:0000000000000318 Asu0_s0_M2
+   Keccak1600NoOpt.S:230    *ABS*:000000000000031c Asu1_s0_M2
+   Keccak1600NoOpt.S:233    *ABS*:0000000000000320 Aba0_s1_M2
+   Keccak1600NoOpt.S:234    *ABS*:0000000000000324 Aba1_s1_M2
+   Keccak1600NoOpt.S:235    *ABS*:0000000000000328 Abe0_s1_M2
+   Keccak1600NoOpt.S:236    *ABS*:000000000000032c Abe1_s1_M2
+   Keccak1600NoOpt.S:237    *ABS*:0000000000000330 Abi0_s1_M2
+   Keccak1600NoOpt.S:238    *ABS*:0000000000000334 Abi1_s1_M2
+   Keccak1600NoOpt.S:239    *ABS*:0000000000000338 Abo0_s1_M2
+   Keccak1600NoOpt.S:240    *ABS*:000000000000033c Abo1_s1_M2
+   Keccak1600NoOpt.S:241    *ABS*:0000000000000340 Abu0_s1_M2
+   Keccak1600NoOpt.S:242    *ABS*:0000000000000344 Abu1_s1_M2
+   Keccak1600NoOpt.S:243    *ABS*:0000000000000348 Aga0_s1_M2
+   Keccak1600NoOpt.S:244    *ABS*:000000000000034c Aga1_s1_M2
+   Keccak1600NoOpt.S:245    *ABS*:0000000000000350 Age0_s1_M2
+   Keccak1600NoOpt.S:246    *ABS*:0000000000000354 Age1_s1_M2
+   Keccak1600NoOpt.S:247    *ABS*:0000000000000358 Agi0_s1_M2
+   Keccak1600NoOpt.S:248    *ABS*:000000000000035c Agi1_s1_M2
+   Keccak1600NoOpt.S:249    *ABS*:0000000000000360 Ago0_s1_M2
+   Keccak1600NoOpt.S:250    *ABS*:0000000000000364 Ago1_s1_M2
+   Keccak1600NoOpt.S:251    *ABS*:0000000000000368 Agu0_s1_M2
+   Keccak1600NoOpt.S:252    *ABS*:000000000000036c Agu1_s1_M2
+   Keccak1600NoOpt.S:253    *ABS*:0000000000000370 Aka0_s1_M2
+   Keccak1600NoOpt.S:254    *ABS*:0000000000000374 Aka1_s1_M2
+   Keccak1600NoOpt.S:255    *ABS*:0000000000000378 Ake0_s1_M2
+   Keccak1600NoOpt.S:256    *ABS*:000000000000037c Ake1_s1_M2
+   Keccak1600NoOpt.S:257    *ABS*:0000000000000380 Aki0_s1_M2
+   Keccak1600NoOpt.S:258    *ABS*:0000000000000384 Aki1_s1_M2
+   Keccak1600NoOpt.S:259    *ABS*:0000000000000388 Ako0_s1_M2
+   Keccak1600NoOpt.S:260    *ABS*:000000000000038c Ako1_s1_M2
+   Keccak1600NoOpt.S:261    *ABS*:0000000000000390 Aku0_s1_M2
+   Keccak1600NoOpt.S:262    *ABS*:0000000000000394 Aku1_s1_M2
+   Keccak1600NoOpt.S:263    *ABS*:0000000000000398 Ama0_s1_M2
+   Keccak1600NoOpt.S:264    *ABS*:000000000000039c Ama1_s1_M2
+   Keccak1600NoOpt.S:265    *ABS*:00000000000003a0 Ame0_s1_M2
+   Keccak1600NoOpt.S:266    *ABS*:00000000000003a4 Ame1_s1_M2
+   Keccak1600NoOpt.S:267    *ABS*:00000000000003a8 Ami0_s1_M2
+   Keccak1600NoOpt.S:268    *ABS*:00000000000003ac Ami1_s1_M2
+   Keccak1600NoOpt.S:269    *ABS*:00000000000003b0 Amo0_s1_M2
+   Keccak1600NoOpt.S:270    *ABS*:00000000000003b4 Amo1_s1_M2
+   Keccak1600NoOpt.S:271    *ABS*:00000000000003b8 Amu0_s1_M2
+   Keccak1600NoOpt.S:272    *ABS*:00000000000003bc Amu1_s1_M2
+   Keccak1600NoOpt.S:273    *ABS*:00000000000003c0 Asa0_s1_M2
+   Keccak1600NoOpt.S:274    *ABS*:00000000000003c4 Asa1_s1_M2
+   Keccak1600NoOpt.S:275    *ABS*:00000000000003c8 Ase0_s1_M2
+   Keccak1600NoOpt.S:276    *ABS*:00000000000003cc Ase1_s1_M2
+   Keccak1600NoOpt.S:277    *ABS*:00000000000003d0 Asi0_s1_M2
+   Keccak1600NoOpt.S:278    *ABS*:00000000000003d4 Asi1_s1_M2
+   Keccak1600NoOpt.S:279    *ABS*:00000000000003d8 Aso0_s1_M2
+   Keccak1600NoOpt.S:280    *ABS*:00000000000003dc Aso1_s1_M2
+   Keccak1600NoOpt.S:281    *ABS*:00000000000003e0 Asu0_s1_M2
+   Keccak1600NoOpt.S:282    *ABS*:00000000000003e4 Asu1_s1_M2
+   Keccak1600NoOpt.S:285    *ABS*:00000000000003e8 Aba0_s2_M2
+   Keccak1600NoOpt.S:286    *ABS*:00000000000003ec Aba1_s2_M2
+   Keccak1600NoOpt.S:287    *ABS*:00000000000003f0 Abe0_s2_M2
+   Keccak1600NoOpt.S:288    *ABS*:00000000000003f4 Abe1_s2_M2
+   Keccak1600NoOpt.S:289    *ABS*:00000000000003f8 Abi0_s2_M2
+   Keccak1600NoOpt.S:290    *ABS*:00000000000003fc Abi1_s2_M2
+   Keccak1600NoOpt.S:291    *ABS*:0000000000000400 Abo0_s2_M2
+   Keccak1600NoOpt.S:292    *ABS*:0000000000000404 Abo1_s2_M2
+   Keccak1600NoOpt.S:293    *ABS*:0000000000000408 Abu0_s2_M2
+   Keccak1600NoOpt.S:294    *ABS*:000000000000040c Abu1_s2_M2
+   Keccak1600NoOpt.S:295    *ABS*:0000000000000410 Aga0_s2_M2
+   Keccak1600NoOpt.S:296    *ABS*:0000000000000414 Aga1_s2_M2
+   Keccak1600NoOpt.S:297    *ABS*:0000000000000418 Age0_s2_M2
+   Keccak1600NoOpt.S:298    *ABS*:000000000000041c Age1_s2_M2
+   Keccak1600NoOpt.S:299    *ABS*:0000000000000420 Agi0_s2_M2
+   Keccak1600NoOpt.S:300    *ABS*:0000000000000424 Agi1_s2_M2
+   Keccak1600NoOpt.S:301    *ABS*:0000000000000428 Ago0_s2_M2
+   Keccak1600NoOpt.S:302    *ABS*:000000000000042c Ago1_s2_M2
+   Keccak1600NoOpt.S:303    *ABS*:0000000000000430 Agu0_s2_M2
+   Keccak1600NoOpt.S:304    *ABS*:0000000000000434 Agu1_s2_M2
+   Keccak1600NoOpt.S:305    *ABS*:0000000000000438 Aka0_s2_M2
+   Keccak1600NoOpt.S:306    *ABS*:000000000000043c Aka1_s2_M2
+   Keccak1600NoOpt.S:307    *ABS*:0000000000000440 Ake0_s2_M2
+   Keccak1600NoOpt.S:308    *ABS*:0000000000000444 Ake1_s2_M2
+   Keccak1600NoOpt.S:309    *ABS*:0000000000000448 Aki0_s2_M2
+   Keccak1600NoOpt.S:310    *ABS*:000000000000044c Aki1_s2_M2
+   Keccak1600NoOpt.S:311    *ABS*:0000000000000450 Ako0_s2_M2
+   Keccak1600NoOpt.S:312    *ABS*:0000000000000454 Ako1_s2_M2
+   Keccak1600NoOpt.S:313    *ABS*:0000000000000458 Aku0_s2_M2
+   Keccak1600NoOpt.S:314    *ABS*:000000000000045c Aku1_s2_M2
+   Keccak1600NoOpt.S:315    *ABS*:0000000000000460 Ama0_s2_M2
+   Keccak1600NoOpt.S:316    *ABS*:0000000000000464 Ama1_s2_M2
+   Keccak1600NoOpt.S:317    *ABS*:0000000000000468 Ame0_s2_M2
+   Keccak1600NoOpt.S:318    *ABS*:000000000000046c Ame1_s2_M2
+   Keccak1600NoOpt.S:319    *ABS*:0000000000000470 Ami0_s2_M2
+   Keccak1600NoOpt.S:320    *ABS*:0000000000000474 Ami1_s2_M2
+   Keccak1600NoOpt.S:321    *ABS*:0000000000000478 Amo0_s2_M2
+   Keccak1600NoOpt.S:322    *ABS*:000000000000047c Amo1_s2_M2
+   Keccak1600NoOpt.S:323    *ABS*:0000000000000480 Amu0_s2_M2
+   Keccak1600NoOpt.S:324    *ABS*:0000000000000484 Amu1_s2_M2
+   Keccak1600NoOpt.S:325    *ABS*:0000000000000488 Asa0_s2_M2
+   Keccak1600NoOpt.S:326    *ABS*:000000000000048c Asa1_s2_M2
+   Keccak1600NoOpt.S:327    *ABS*:0000000000000490 Ase0_s2_M2
+   Keccak1600NoOpt.S:328    *ABS*:0000000000000494 Ase1_s2_M2
+   Keccak1600NoOpt.S:329    *ABS*:0000000000000498 Asi0_s2_M2
+   Keccak1600NoOpt.S:330    *ABS*:000000000000049c Asi1_s2_M2
+   Keccak1600NoOpt.S:331    *ABS*:00000000000004a0 Aso0_s2_M2
+   Keccak1600NoOpt.S:332    *ABS*:00000000000004a4 Aso1_s2_M2
+   Keccak1600NoOpt.S:333    *ABS*:00000000000004a8 Asu0_s2_M2
+   Keccak1600NoOpt.S:334    *ABS*:00000000000004ac Asu1_s2_M2
+   Keccak1600NoOpt.S:341    *ABS*:00000000000004b0 mDa0_s0
+   Keccak1600NoOpt.S:342    *ABS*:00000000000004b4 mDa1_s0
+   Keccak1600NoOpt.S:343    *ABS*:00000000000004b8 mDe0_s0
+   Keccak1600NoOpt.S:344    *ABS*:00000000000004bc mDe1_s0
+   Keccak1600NoOpt.S:345    *ABS*:00000000000004c0 mDi0_s0
+   Keccak1600NoOpt.S:346    *ABS*:00000000000004c4 mDi1_s0
+   Keccak1600NoOpt.S:347    *ABS*:00000000000004c8 mDo0_s0
+   Keccak1600NoOpt.S:348    *ABS*:00000000000004cc mDo1_s0
+   Keccak1600NoOpt.S:349    *ABS*:00000000000004d0 mDu0_s0
+   Keccak1600NoOpt.S:350    *ABS*:00000000000004d4 mDu1_s0
+   Keccak1600NoOpt.S:352    *ABS*:00000000000004d8 mDa0_s1
+   Keccak1600NoOpt.S:353    *ABS*:00000000000004dc mDa1_s1
+   Keccak1600NoOpt.S:354    *ABS*:00000000000004e0 mDe0_s1
+   Keccak1600NoOpt.S:355    *ABS*:00000000000004e4 mDe1_s1
+   Keccak1600NoOpt.S:356    *ABS*:00000000000004e8 mDi0_s1
+   Keccak1600NoOpt.S:357    *ABS*:00000000000004ec mDi1_s1
+   Keccak1600NoOpt.S:358    *ABS*:00000000000004f0 mDo0_s1
+   Keccak1600NoOpt.S:359    *ABS*:00000000000004f4 mDo1_s1
+   Keccak1600NoOpt.S:360    *ABS*:00000000000004f8 mDu0_s1
+   Keccak1600NoOpt.S:361    *ABS*:00000000000004fc mDu1_s1
+   Keccak1600NoOpt.S:363    *ABS*:0000000000000500 mDa0_s2
+   Keccak1600NoOpt.S:364    *ABS*:0000000000000504 mDa1_s2
+   Keccak1600NoOpt.S:365    *ABS*:0000000000000508 mDe0_s2
+   Keccak1600NoOpt.S:366    *ABS*:000000000000050c mDe1_s2
+   Keccak1600NoOpt.S:367    *ABS*:0000000000000510 mDi0_s2
+   Keccak1600NoOpt.S:368    *ABS*:0000000000000514 mDi1_s2
+   Keccak1600NoOpt.S:369    *ABS*:0000000000000518 mDo0_s2
+   Keccak1600NoOpt.S:370    *ABS*:000000000000051c mDo1_s2
+   Keccak1600NoOpt.S:371    *ABS*:0000000000000520 mDu0_s2
+   Keccak1600NoOpt.S:372    *ABS*:0000000000000524 mDu1_s2
+   Keccak1600NoOpt.S:377    *ABS*:0000000000000528 mRC
+   Keccak1600NoOpt.S:383    *ABS*:000000000000052c memR0
+   Keccak1600NoOpt.S:384    *ABS*:0000000000000530 memR1
+   Keccak1600NoOpt.S:385    *ABS*:0000000000000534 memR2
+   Keccak1600NoOpt.S:386    *ABS*:0000000000000538 memR3
+   Keccak1600NoOpt.S:387    *ABS*:000000000000053c memR4
+   Keccak1600NoOpt.S:388    *ABS*:0000000000000540 memR5
+   Keccak1600NoOpt.S:389    *ABS*:0000000000000544 memR6
+   Keccak1600NoOpt.S:390    *ABS*:0000000000000548 memR7
+   Keccak1600NoOpt.S:391    *ABS*:000000000000054c memR8
+   Keccak1600NoOpt.S:392    *ABS*:0000000000000550 memR9
+   Keccak1600NoOpt.S:393    *ABS*:0000000000000554 memR10
+   Keccak1600NoOpt.S:394    *ABS*:0000000000000558 memR11
+   Keccak1600NoOpt.S:395    *ABS*:000000000000055c memR12
+   Keccak1600NoOpt.S:396    *ABS*:0000000000000560 memLR
+   Keccak1600NoOpt.S:1547   .text:0000000000000000 $t
+   Keccak1600NoOpt.S:1550   .text:0000000000000000 KeccakF1600_StatePermute
+   Keccak1600NoOpt.S:1554   .text:0000000000000100 KeccakP1600_Permute_RoundConstants24
+   Keccak1600NoOpt.S:1594   .text:0000000000000200 KeccakP1600_Permute
+   Keccak1600NoOpt.S:1556   .text:0000000000000100 $d
+   Keccak1600NoOpt.S:1568   .text:0000000000000160 KeccakP1600_Permute_RoundConstants12
+   Keccak1600NoOpt.S:1577   .text:00000000000001a0 KeccakP1600_Permute_RoundConstants0
+   Keccak1600NoOpt.S:1582   .text:00000000000001c0 KeccakP1600_Permute_RoundConstants0Mod4
+   Keccak1600NoOpt.S:1593   .text:00000000000001c4 $t
+   Keccak1600NoOpt.S:1597   .text:0000000000000208 KeccakP1600_Permute_RoundLoop
+   Keccak1600NoOpt.S:1607   .text:0000000000002000 KeccakP1600_Permute0
+   Keccak1600NoOpt.S:1608   .text:0000000000002000 KeccakP1600_Permute_0
+   Keccak1600NoOpt.S:1620   .text:0000000000003e00 KeccakP1600_Permute1
+   Keccak1600NoOpt.S:1621   .text:0000000000003e00 KeccakP1600_Permute_1
+   Keccak1600NoOpt.S:1633   .text:0000000000005d00 KeccakP1600_Permute2
+   Keccak1600NoOpt.S:1634   .text:0000000000005d00 KeccakP1600_Permute_2
+   Keccak1600NoOpt.S:1646   .text:0000000000007b00 KeccakP1600_Permute3
+   Keccak1600NoOpt.S:1647   .text:0000000000007b00 KeccakP1600_Permute_3
+
+NO UNDEFINED SYMBOLS
